@@ -1,4 +1,216 @@
-/* =======================================================
+body {
+  font-family: Arial, sans-serif;
+  background: #f7ffe0;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header, footer {
+  background: #ffb347;
+  color: #6a3e09;
+  text-align: center;
+  padding: 1rem;
+  letter-spacing: 2px;
+}
+#score {
+  margin-top: 0.5em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pet-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+/* Chicken avatar */
+#chicken-avatar {
+  width: 120px;
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.chicken {
+  position: relative;
+  width: 100px;
+  height: 110px;
+  margin: 0 auto;
+}
+.body {
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  width: 70px;
+  height: 55px;
+  background: #fffbe0;
+  border-radius: 55px 55px 55px 55px / 40px 40px 55px 55px;
+  border: 2px solid #bda70c;
+  z-index: 2;
+  box-shadow: 0 2px 8px #e9d38377;
+}
+.wing {
+  position: absolute;
+  left: 30px;
+  top: 50px;
+  width: 28px;
+  height: 28px;
+  background: #f9d776;
+  border-radius: 50% 60% 50% 60% / 70% 80% 60% 50%;
+  border: 2px solid #bda70c;
+  z-index: 3;
+  animation: flap 0.8s infinite alternate;
+  transform-origin: top left;
+}
+@keyframes flap {
+  from { transform: rotate(12deg);}
+  to   { transform: rotate(-16deg);}
+}
+.head {
+  position: absolute;
+  left: 52px;
+  top: 18px;
+  width: 40px;
+  height: 38px;
+  background: #fffbe0;
+  border-radius: 90% 95% 90% 100% / 100% 90% 100% 80%;
+  border: 2px solid #bda70c;
+  z-index: 4;
+}
+.eye {
+  position: absolute;
+  left: 25px;
+  top: 14px;
+  width: 7px;
+  height: 7px;
+  background: #5c4307;
+  border-radius: 50%;
+  z-index: 6;
+  box-shadow: 1px 1px 0 1px #fffbe0;
+}
+.beak {
+  position: absolute;
+  left: 35px;
+  top: 19px;
+  width: 10px;
+  height: 10px;
+  background: #fbbf24;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  border-radius: 25% 55% 40% 60%;
+  z-index: 7;
+}
+.comb {
+  position: absolute;
+  left: 21px;
+  top: 0px;
+  width: 12px;
+  height: 15px;
+  background: #ea5455;
+  border-radius: 90% 60% 40% 60%;
+  transform: rotate(-9deg);
+  z-index: 8;
+  box-shadow: 6px -2px 0 0 #ea5455, 11px 0px 0 0 #ea5455;
+}
+.leg {
+  position: absolute;
+  width: 5px;
+  height: 28px;
+  background: #fbbf24;
+  border-radius: 8px;
+  z-index: 1;
+  bottom: 0;
+  box-shadow: 0 1px 0 #a67c16;
+}
+.leg-left {
+  left: 25px;
+  animation: legmove 0.7s infinite alternate;
+}
+.leg-right {
+  left: 60px;
+  animation: legmove 0.7s infinite 0.4s alternate;
+}
+@keyframes legmove {
+  from { transform: rotate(3deg);}
+  to   { transform: rotate(-10deg);}
+}
+#pet-message {
+  min-height: 2em;
+  margin-top: 1em;
+  font-size: 1.1em;
+  color: #9b7a09;
+  text-align: center;
+}
+#game {
+  width: 95vw;
+  max-width: 450px;
+  margin: 0 auto;
+  background: #fff9ed;
+  border-radius: 15px;
+  box-shadow: 0 2px 12px #ffebc077;
+  padding: 1.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#round-phase {
+  margin-bottom: 0.7em;
+  font-weight: bold;
+  font-size: 1.08em;
+  color: #b08313;
+}
+#chicken-question-block, #child-question-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  align-items: center;
+}
+#chicken-question, #chicken-answer {
+  margin: 0.2em 0;
+  font-size: 1.1em;
+  color: #5c4307;
+  text-align: center;
+}
+input[type="text"] {
+  font-size: 1em;
+  padding: 0.45em 0.7em;
+  border: 1px solid #e6c93f;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 330px;
+  box-sizing: border-box;
+  margin-bottom: 0.2em;
+}
+button {
+  padding: 0.6em 1.3em;
+  font-size: 1em;
+  background: #ffe476;
+  border: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover, #rate-btn:hover {
+  background: #ffb347;
+  color: #6a3e09;
+}
+#next-round-btn {
+  margin-top: 1em;
+}
+@media (max-width: 600px) {
+  #chicken-avatar { width: 38vw; height: 45vw; }
+  #game { max-width: 99vw; padding: 0.5em;}
+  input[type="text"] { font-size: 0.98em; }
+}/* =======================================================
    Hyper-Bot  •  Ultra-Clean Theme
    ======================================================= */
 
