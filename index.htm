@@ -2,15 +2,16 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Chicken_bot_tamagochi — обыграй курицу!</title>
+  <title>Chicken_bot_tamagochi — умная курица и консоль</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="styles.css">
+  <!-- Подключаем AI-библиотеку -->
   <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js"></script>
 </head>
 <body>
   <header>
     <h1>Chicken_bot_tamagochi</h1>
-    <div id="score">Ты: 0 | Курица: 0</div>
+    <div>Поговори с курицей и следи за логами 👇</div>
   </header>
   <main>
     <div class="pet-area">
@@ -27,27 +28,30 @@
           <div class="leg leg-right"></div>
         </div>
       </div>
-      <div id="pet-message">Готов сыграть в интеллектуальную дуэль?</div>
+      <div id="pet-message">Готова поиграть! Задай мне вопрос или просто напиши что-нибудь!</div>
     </div>
-    <div id="game">
-      <div id="round-phase">Раунд 1: Курица задаёт вопрос!</div>
-      <div id="chicken-question-block">
-        <div id="chicken-question"></div>
-        <input type="text" id="child-answer" placeholder="Твой ответ..." autocomplete="off">
-        <button id="answer-btn">Ответить</button>
-      </div>
-      <div id="child-question-block" style="display:none;">
-        <input type="text" id="child-question" placeholder="Спроси что-то у курицы..." autocomplete="off">
-        <button id="ask-chicken-btn">Спросить курицу</button>
-        <div id="chicken-answer"></div>
-        <button id="rate-btn" style="display:none;">Курица не знает? Засчитать победу!</button>
-      </div>
-      <button id="next-round-btn" style="display:none;">Следующий раунд</button>
+    <div class="chat-block">
+      <input type="text" id="user-input" placeholder="Твой вопрос курице..." autocomplete="off">
+      <button id="ask-btn">Спросить курицу</button>
     </div>
+    <div id="chat-log"></div>
   </main>
   <footer>
     © 2025 Chicken_bot_tamagochi
   </footer>
+  
+  <!-- КОНСОЛЬ: -->
+  <div id="console-toggle">Открыть консоль</div>
+  <div id="console-panel" style="display:none;">
+    <div id="console-header">
+      <span id="console-move" title="На весь экран/Обычный размер">⤢</span>
+      <span id="console-min" title="Свернуть">⮝</span>
+      <span id="console-close" title="Закрыть">✖</span>
+    </div>
+    <div id="console-log"></div>
+  </div>
+  
+  <script src="console.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
