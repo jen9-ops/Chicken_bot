@@ -2,35 +2,99 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Мультик: яйцо и цыплёнок</title>
+  <title>Мой космический цыплёнок</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main>
-    <div class="cartoon-wrapper">
-      <div class="cartoon-scene">
-        <div id="egg-container">
-          <div class="egg"></div>
-          <div class="crack" id="crack1"></div>
-          <div class="crack" id="crack2"></div>
-        </div>
-        <div id="chicken" class="hide">
-          <div class="chick-head"></div>
-          <div class="chick-eye"></div>
-          <div class="chick-beak"></div>
-          <div class="chick-body"></div>
-          <div class="chick-wing left"></div>
-          <div class="chick-wing right"></div>
-          <div class="chick-leg left"></div>
-          <div class="chick-leg right"></div>
-        </div>
-      </div>
-      <div id="caption">В одном уютном гнезде лежит яйцо...</div>
-      <button id="sound-btn" class="sound-btn">Включить звук</button>
+    <div class="svg-wrapper">
+      <svg id="scene" viewBox="0 0 420 420" width="98vw" height="98vw" preserveAspectRatio="xMidYMid meet">
+        <!-- ФОН: Космос, звёзды, комета -->
+        <defs>
+          <radialGradient id="sky" cx="50%" cy="50%" r="65%">
+            <stop offset="0%" stop-color="#2e2156"/>
+            <stop offset="100%" stop-color="#182044"/>
+          </radialGradient>
+          <radialGradient id="egg-grad" cx="50%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f8eaae" />
+            <stop offset="90%" stop-color="#e4dce2" />
+            <stop offset="100%" stop-color="#b5c1df" />
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="420" height="420" fill="url(#sky)"/>
+        <!-- Звёзды -->
+        <g id="stars"></g>
+        <!-- Комета -->
+        <g id="comet">
+          <ellipse cx="130" cy="30" rx="11" ry="5" fill="#fff9c1" opacity="0.7"/>
+          <rect x="75" y="19" width="60" height="12" fill="url(#egg-grad)" opacity="0.42" rx="6" />
+        </g>
+        <!-- Луна -->
+        <ellipse cx="385" cy="60" rx="26" ry="24" fill="#fff8ec" opacity="0.55"/>
+        <!-- Гнездо -->
+        <ellipse cx="210" cy="390" rx="95" ry="28" fill="#ad7a47" opacity="0.7"/>
+        <ellipse cx="210" cy="400" rx="115" ry="19" fill="#6a4c2e" opacity="0.25"/>
+        <!-- Яйцо -->
+        <g id="eggGroup">
+          <ellipse id="eggMain" cx="210" cy="300" rx="55" ry="77" fill="url(#egg-grad)" stroke="#eedb7a" stroke-width="8"/>
+          <g id="cracks">
+            <polyline id="crack1" points="210,250 210,280" fill="none" stroke="#bc9856" stroke-width="3.2" opacity="0"/>
+            <polyline id="crack2" points="205,305 220,335" fill="none" stroke="#bc9856" stroke-width="3.2" opacity="0"/>
+          </g>
+          <!-- Свет от яйца -->
+          <ellipse id="eggGlow" cx="210" cy="306" rx="67" ry="87" fill="#fffde6" opacity="0" />
+        </g>
+        <!-- Цыплёнок -->
+        <g id="chickGroup" opacity="0">
+          <!-- Голова -->
+          <ellipse id="chickHead" cx="210" cy="255" rx="36" ry="34"/>
+          <!-- Глаза -->
+          <ellipse id="chickEyeL" cx="197" cy="255" rx="5" ry="7"/>
+          <ellipse id="chickEyeR" cx="222" cy="255" rx="5" ry="7"/>
+          <!-- Зрачки -->
+          <ellipse id="chickPupilL" cx="197" cy="258" rx="2.1" ry="3"/>
+          <ellipse id="chickPupilR" cx="222" cy="258" rx="2.1" ry="3"/>
+          <!-- Клюв -->
+          <polygon id="chickBeak" points="215,265 210,273 205,265" />
+          <!-- Щёки -->
+          <ellipse id="chickCheekL" cx="195" cy="267" rx="6" ry="4"/>
+          <ellipse id="chickCheekR" cx="225" cy="267" rx="6" ry="4"/>
+          <!-- Туловище -->
+          <ellipse id="chickBody" cx="210" cy="310" rx="30" ry="39"/>
+          <!-- Крылья -->
+          <ellipse id="chickWingL" cx="182" cy="312" rx="9" ry="19"/>
+          <ellipse id="chickWingR" cx="238" cy="312" rx="9" ry="19"/>
+          <!-- Лапки -->
+          <rect id="chickLegL" x="201" y="346" width="5.5" height="22" rx="2.2"/>
+          <rect id="chickLegR" x="213" y="346" width="5.5" height="22" rx="2.2"/>
+          <!-- Декор (звёзды, пятна) — добавляется при смене образа -->
+        </g>
+      </svg>
+      <div id="caption" class="caption"></div>
     </div>
-    <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12f2881a18.mp3" preload="auto" loop></audio>
+    <div id="choicePanel" class="hide">
+      <div class="choose-text">Выбери цыплёнка:</div>
+      <div class="choices">
+        <button class="chick-btn" data-style="normal">
+          <span class="chick-icon normal"></span>
+          <div>Обычный</div>
+        </button>
+        <button class="chick-btn" data-style="space">
+          <span class="chick-icon space"></span>
+          <div>Космический</div>
+        </button>
+        <button class="chick-btn" data-style="zombie">
+          <span class="chick-icon zombie"></span>
+          <div>Зомби</div>
+        </button>
+      </div>
+    </div>
+    <div id="finalPanel" class="hide">
+      <div class="caption">Ура! Ты выбрал своего цыплёнка!</div>
+      <button id="restartBtn" class="svg-btn">Смотреть снова</button>
+    </div>
   </main>
-  <script src="./script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
