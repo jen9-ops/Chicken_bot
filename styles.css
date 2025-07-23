@@ -2,9 +2,9 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
+  background: #fafad2;
   display: flex;
   flex-direction: column;
-  background: #fafad2;
 }
 header, footer {
   background: #ffb347;
@@ -18,7 +18,6 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 .pet-area {
   display: flex;
@@ -33,34 +32,19 @@ main {
   justify-content: center;
   align-items: flex-end;
 }
-.chicken {
-  position: relative;
-  width: 100px;
-  height: 110px;
-  margin: 0 auto;
-}
+.chicken { position: relative; width: 100px; height: 110px; margin: 0 auto; }
 .body {
-  position: absolute;
-  bottom: 20px;
-  left: 10px;
-  width: 70px;
-  height: 55px;
-  background: #fffbe0;
+  position: absolute; bottom: 20px; left: 10px;
+  width: 70px; height: 55px; background: #fffbe0;
   border-radius: 55px 55px 55px 55px / 40px 40px 55px 55px;
-  border: 2px solid #bda70c;
-  z-index: 2;
+  border: 2px solid #bda70c; z-index: 2;
   box-shadow: 0 2px 8px #e9d38377;
 }
 .wing {
-  position: absolute;
-  left: 30px;
-  top: 50px;
-  width: 28px;
-  height: 28px;
-  background: #f9d776;
+  position: absolute; left: 30px; top: 50px;
+  width: 28px; height: 28px; background: #f9d776;
   border-radius: 50% 60% 50% 60% / 70% 80% 60% 50%;
-  border: 2px solid #bda70c;
-  z-index: 3;
+  border: 2px solid #bda70c; z-index: 3;
   animation: flap 0.8s infinite alternate;
   transform-origin: top left;
 }
@@ -69,120 +53,60 @@ main {
   to   { transform: rotate(-16deg);}
 }
 .head {
-  position: absolute;
-  left: 52px;
-  top: 18px;
-  width: 40px;
-  height: 38px;
-  background: #fffbe0;
+  position: absolute; left: 52px; top: 18px;
+  width: 40px; height: 38px; background: #fffbe0;
   border-radius: 90% 95% 90% 100% / 100% 90% 100% 80%;
-  border: 2px solid #bda70c;
-  z-index: 4;
+  border: 2px solid #bda70c; z-index: 4;
 }
 .eye {
-  position: absolute;
-  left: 25px;
-  top: 14px;
-  width: 7px;
-  height: 7px;
-  background: #5c4307;
-  border-radius: 50%;
-  z-index: 6;
+  position: absolute; left: 25px; top: 14px;
+  width: 7px; height: 7px; background: #5c4307;
+  border-radius: 50%; z-index: 6;
   box-shadow: 1px 1px 0 1px #fffbe0;
 }
 .beak {
-  position: absolute;
-  left: 35px;
-  top: 19px;
-  width: 10px;
-  height: 10px;
-  background: #fbbf24;
+  position: absolute; left: 35px; top: 19px;
+  width: 10px; height: 10px; background: #fbbf24;
   clip-path: polygon(0 0, 100% 50%, 0 100%);
-  border-radius: 25% 55% 40% 60%;
-  z-index: 7;
+  border-radius: 25% 55% 40% 60%; z-index: 7;
 }
 .comb {
-  position: absolute;
-  left: 21px;
-  top: 0px;
-  width: 12px;
-  height: 15px;
-  background: #ea5455;
+  position: absolute; left: 21px; top: 0px;
+  width: 12px; height: 15px; background: #ea5455;
   border-radius: 90% 60% 40% 60%;
-  transform: rotate(-9deg);
-  z-index: 8;
+  transform: rotate(-9deg); z-index: 8;
   box-shadow: 6px -2px 0 0 #ea5455, 11px 0px 0 0 #ea5455;
 }
 .leg {
-  position: absolute;
-  width: 5px;
-  height: 28px;
-  background: #fbbf24;
-  border-radius: 8px;
-  z-index: 1;
-  bottom: 0;
-  box-shadow: 0 1px 0 #a67c16;
+  position: absolute; width: 5px; height: 28px;
+  background: #fbbf24; border-radius: 8px; z-index: 1;
+  bottom: 0; box-shadow: 0 1px 0 #a67c16;
 }
-.leg-left {
-  left: 25px;
-  animation: legmove 0.7s infinite alternate;
-}
-.leg-right {
-  left: 60px;
-  animation: legmove 0.7s infinite 0.4s alternate;
-}
-@keyframes legmove {
-  from { transform: rotate(3deg);}
-  to   { transform: rotate(-10deg);}
-}
-#pet-message {
-  min-height: 2em;
-  margin-top: 1em;
-  font-size: 1.1em;
-  color: #9b7a09;
-  text-align: center;
-}
+.leg-left { left: 25px; animation: legmove 0.7s infinite alternate; }
+.leg-right { left: 60px; animation: legmove 0.7s infinite 0.4s alternate; }
+@keyframes legmove { from { transform: rotate(3deg);} to { transform: rotate(-10deg);} }
+#pet-message { min-height: 2em; margin-top: 1em; font-size: 1.1em; color: #9b7a09; text-align: center; }
 .chat-block {
-  display: flex;
-  gap: 1em;
-  margin-bottom: 1em;
-  justify-content: center;
+  display: flex; gap: 1em; margin-bottom: 1em; justify-content: center;
 }
 #user-input {
-  font-size: 1em;
-  padding: 0.45em 0.7em;
-  border: 1px solid #e6c93f;
-  border-radius: 6px;
-  width: 260px;
-  box-sizing: border-box;
+  font-size: 1em; padding: 0.45em 0.7em; border: 1px solid #e6c93f;
+  border-radius: 6px; width: 260px; box-sizing: border-box;
 }
 #ask-btn {
-  padding: 0.47em 1em;
-  font-size: 1em;
-  background: #ffe476;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
+  padding: 0.47em 1em; font-size: 1em; background: #ffe476;
+  border: none; border-radius: 6px; cursor: pointer;
+  font-weight: bold; transition: background 0.2s;
 }
 #ask-btn:hover { background: #ffb347; color: #6a3e09; }
 #chat-log {
-  width: 96vw;
-  max-width: 430px;
-  min-height: 60px;
-  background: #fffbe0;
-  border-radius: 11px;
-  margin: 0 auto 2em auto;
-  padding: 1em 1em 0.6em 1em;
-  font-family: Arial, sans-serif;
-  font-size: 1.03em;
-  color: #222;
+  width: 96vw; max-width: 430px; min-height: 60px; background: #fffbe0;
+  border-radius: 11px; margin: 0 auto 2em auto; padding: 1em 1em 0.6em 1em;
+  font-family: Arial, sans-serif; font-size: 1.03em; color: #222;
 }
 #chat-log .ai { color: #4a4307; }
 #chat-log .user { color: #347777; }
 #chat-log .err { color: #ff2020; }
-
 /* Консоль */
 #console-toggle {
   position: fixed;
@@ -264,6 +188,10 @@ main {
   max-height: 100%;
 }
 @media (max-width: 600px) {
+  main { padding: 0.5em 0 0 0;}
+  #chat-log { font-size: 0.97em; max-width: 99vw;}
+  .chat-block { flex-direction: column; gap: 0.3em;}
+  #user-input { width: 90vw; min-width: 160px; }
+  #chicken-avatar { width: 38vw; height: 45vw; }
   #console-panel, #console-panel.fullscreen { max-width: 99vw; height: 30vw; font-size: 0.83em;}
-  #chat-log { font-size: 0.97em; }
 }
