@@ -16,28 +16,28 @@ main, .svg-wrapper {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .svg-wrapper { max-width: 440px; max-height: 460px; }
-#scene { display: block; width: 97vw; max-width: 420px; height: auto;}
+#scene { display: block; width: 99vw; max-width: 420px; height: auto;}
 .caption {
   margin: 1.7vw 0 0 0;
-  font-size: clamp(1.05em, 2.9vw, 1.28em);
+  font-size: clamp(1.05em, 2.8vw, 1.28em);
   color: #f4d57d;
   text-align: center;
   min-height: 2em;
   font-family: inherit;
-  max-width: 95vw;
+  max-width: 97vw;
   text-shadow: 0 1px 7px #3332;
 }
 #choicePanel {
-  margin: 3vw 0 0 0;
+  margin: 4vw 0 0 0;
   display: flex; flex-direction: column; align-items: center;
-  background: rgba(21, 23, 47, 0.92);
-  border-radius: 17px;
-  box-shadow: 0 2px 20px #343b61c2;
-  padding: 24px 18px 20px 18px;
+  background: rgba(21, 23, 47, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 2px 20px #343b61b2;
+  padding: 20px 16px 14px 16px;
 }
-.choose-text { color: #e3c86c; font-size: 1.08em; margin-bottom: 13px;}
+.choose-text { color: #e3c86c; font-size: 1.12em; margin-bottom: 14px;}
 .choices {
-  display: flex; gap: 21px; justify-content: center;
+  display: flex; gap: 24px; justify-content: center;
 }
 .chick-btn {
   display: flex; flex-direction: column; align-items: center; gap: 5px;
@@ -45,75 +45,70 @@ main, .svg-wrapper {
   border: 2px solid #e9e1ab;
   border-radius: 14px;
   box-shadow: 0 2px 10px #7d693230;
-  padding: 15px 9px 10px 9px;
-  cursor: pointer; font-size: 1em; min-width: 86px;
+  padding: 18px 12px 12px 12px;
+  cursor: pointer; font-size: 1.1em; min-width: 88px;
   transition: border 0.23s, box-shadow 0.23s, background 0.22s;
 }
 .chick-btn:hover, .chick-btn.selected {
-  border: 2.8px solid #fac94a;
-  background: #fff7c9;
-  box-shadow: 0 6px 22px #e9ca5791;
+  border: 2.7px solid #66f5f5;
+  background: #c6f9ff;
+  box-shadow: 0 8px 22px #bbf9f991;
 }
 .chick-icon {
   display: block;
   margin-bottom: 2px;
-  width: 44px; height: 44px; border-radius: 50%;
-  box-shadow: 0 2px 7px #e9ca5767;
-  background: #ffe265;
-}
-.chick-icon.normal { background: #ffe265;}
-.chick-icon.space {
-  background: radial-gradient(circle at 55% 42%, #95f3ff 0%, #719bff 48%, #522be7 100%);
+  width: 46px; height: 46px; border-radius: 50%;
+  box-shadow: 0 2px 7px #d7fbff60;
+  background: #afeaff;
   position: relative;
 }
-.chick-icon.space::after {
-  content: "";
-  position: absolute;
-  left: 13px; top: 12px;
-  width: 8px; height: 8px;
+.chick-icon.alien {
+  background: radial-gradient(circle at 55% 40%, #cafffd 0%, #55c2ff 53%, #4d59b4 100%);
+  border: 2px solid #4170a7;
+}
+.chick-icon.alien::before {
+  content: ""; position: absolute;
+  left: 18px; top: 10px; width: 10px; height: 10px;
   background: #fff8ee;
-  border-radius: 50%; box-shadow: 0 0 8px #e4e7ff;
+  border-radius: 50%; box-shadow: 0 0 11px #bbf7ff;
 }
 .chick-icon.zombie {
   background: linear-gradient(140deg, #a7ffa1 40%, #4dd899 100%);
   border: 2px solid #3e4e44;
-  position: relative;
 }
 .chick-icon.zombie::before {
-  content: "";
-  position: absolute;
-  left: 21px; top: 28px;
-  width: 8px; height: 3px;
+  content: ""; position: absolute;
+  left: 26px; top: 31px; width: 9px; height: 3px;
   background: #488141;
-  border-radius: 8px;
+  border-radius: 9px;
 }
 #finalPanel {
-  margin: 4vw 0 0 0;
+  margin: 6vw 0 0 0;
   display: flex; flex-direction: column; align-items: center;
   background: rgba(29,32,50,0.98);
   border-radius: 17px;
   box-shadow: 0 2px 18px #5b5887b1;
-  padding: 26px 24px 23px 24px;
+  padding: 24px 20px 18px 20px;
 }
 .svg-btn {
-  margin: 23px 0 0 0;
-  padding: 0.8em 2em;
+  margin: 22px 0 0 0;
+  padding: 0.82em 2.2em;
   border: none;
-  background: #ffe476;
-  color: #735800;
-  border-radius: 13px;
-  font-size: clamp(1em, 2.1vw, 1.18em);
-  box-shadow: 0 2px 8px #eed67b82;
+  background: #66f5f5;
+  color: #254c57;
+  border-radius: 12px;
+  font-size: clamp(1em, 2.2vw, 1.18em);
+  box-shadow: 0 2px 8px #b0f1fb70;
   cursor: pointer;
   transition: background 0.2s;
 }
-.svg-btn:active, .svg-btn:focus { background: #fffbe9;}
+.svg-btn:active, .svg-btn:focus { background: #e1fffe;}
 .hide { display: none !important; }
 @media (max-width: 650px) {
   main, .svg-wrapper {
     min-height: 100vh; height: 100svh; justify-content: flex-start;
   }
-  #scene { width: 98vw; }
+  #scene { width: 99vw; }
   .caption { font-size: 1.04em;}
-  #choicePanel, #finalPanel { padding: 13px 7px 10px 7px;}
+  #choicePanel, #finalPanel { padding: 11px 5px 8px 5px;}
 }
