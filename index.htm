@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Hyper-Bot 🎓</title>
+  <title>chicken_bot🎓</title>
 
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,
@@ -15,10 +15,13 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
+
+  <!-- transformers.js (GPT-2) -->
   <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js"></script>
 </head>
 
 <body class="d-flex flex-column h-100">
+
   <!-- NAVBAR -->
   <header class="navbar glass shadow-sm px-3">
     <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
@@ -46,21 +49,28 @@
 
         <li><hr class="dropdown-divider"></li>
 
-        <li><a class="dropdown-item" href="#" onclick="toggleTheme()"><i class="bi bi-moon-stars me-1"></i>Тёмная тема</a></li>
+        <li><a class="dropdown-item" href="#" onclick="toggleTheme()"><i class="bi bi-moon-stars me-1"></i>Тема</a></li>
       </ul>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="flex-grow-1 d-flex flex-column gap-2 p-3 overflow-hidden">
-    <div id="chat" class="chat glass flex-grow-1 overflow-auto"></div>
+  <!-- Основной контент (если понадобится что-то сверху консоли) -->
+  <main class="flex-grow-1 d-flex flex-column p-3 overflow-auto">
+    <!-- Пока пусто. Вся «консоль» живёт внизу в фиксированной панели -->
+  </main>
 
-    <div class="d-flex gap-2">
+  <!-- Растягиваемая нижняя консоль -->
+  <div id="consolePanel" class="console-panel glass">
+    <div id="consoleHandle" class="console-handle" title="Потянуть вверх/вниз"></div>
+
+    <div id="chat" class="chat flex-grow-1 overflow-auto"></div>
+
+    <div class="d-flex gap-2 p-2">
       <textarea id="userInput" rows="2" class="form-control soft"
                 placeholder="Shift+Enter – новая строка, Ctrl+Enter – отправить"></textarea>
-      <button class="btn btn-primary" onclick="ask()">➤</button>
+      <button id="btnAsk" class="btn btn-primary" onclick="ask()">➤</button>
     </div>
-  </main>
+  </div>
 
   <input id="fileInput" type="file" accept="application/json" class="d-none" onchange="importData(event)">
 
