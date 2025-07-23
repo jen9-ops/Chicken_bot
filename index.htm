@@ -2,53 +2,31 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Chicken_bot_tamagochi — умная курица</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script tupe="module" src="./transformers.min.js"></script>
+  <title>Мультик: яйцо и цыплёнок</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <header>
-    <h1>Chicken_bot_tamagochi</h1>
-    <div>Поговори с курицей и следи за логами 👇</div>
-  </header>
   <main>
-    <div class="pet-area">
-      <div id="chicken-avatar">
-        <div class="chicken">
-          <div class="body"></div>
-          <div class="wing"></div>
-          <div class="head">
-            <div class="eye"></div>
-            <div class="beak"></div>
-            <div class="comb"></div>
-          </div>
-          <div class="leg leg-left"></div>
-          <div class="leg leg-right"></div>
-        </div>
+    <div class="cartoon-scene">
+      <div id="egg-container">
+        <div class="egg"></div>
+        <div class="crack" id="crack1"></div>
+        <div class="crack" id="crack2"></div>
       </div>
-      <div id="pet-message">Готова поиграть! Задай мне вопрос или просто напиши что-нибудь!</div>
+      <div id="chicken" class="hide">
+        <div class="chicken-head"></div>
+        <div class="chicken-eye"></div>
+        <div class="chicken-beak"></div>
+        <div class="chicken-body"></div>
+        <div class="chicken-wing left"></div>
+        <div class="chicken-wing right"></div>
+        <div class="chicken-leg left"></div>
+        <div class="chicken-leg right"></div>
+      </div>
     </div>
-    <div class="chat-block">
-      <input type="text" id="user-input" placeholder="Твой вопрос курице..." autocomplete="off">
-      <button id="ask-btn">Спросить курицу</button>
-    </div>
-    <div id="chat-log"></div>
+    <div id="caption">...</div>
   </main>
-  <footer>
-    © 2025 Chicken_bot_tamagochi
-  </footer>
-  <!-- Консоль -->
-  <div id="console-toggle">Открыть консоль</div>
-  <div id="console-panel" style="display:none;">
-    <div id="console-header">
-      <span id="console-move" title="На весь экран/Обычный размер">⤢</span>
-      <span id="console-min" title="Свернуть">⮝</span>
-      <span id="console-close" title="Закрыть">✖</span>
-    </div>
-    <div id="console-log"></div>
-  </div>
-  <script src="./console.js"></script>
-  <script type="module" src="./script.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
