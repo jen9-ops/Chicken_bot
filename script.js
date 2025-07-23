@@ -1,5 +1,4 @@
 window.onload = function () {
-  // Яйцо падает быстро
   setTimeout(() => {
     const egg = document.getElementById('egg');
     egg.style.transition = "transform 0.32s cubic-bezier(.7,1.7,.3,1)";
@@ -7,21 +6,20 @@ window.onload = function () {
     setTimeout(() => {
       document.getElementById('eggGlow').setAttribute('opacity', '0.32');
       document.getElementById('eggCrack').setAttribute('opacity', '1');
-    }, 120); // трещина почти сразу
+    }, 120);
     setTimeout(() => {
       egg.style.opacity = 0;
       setTimeout(() => {
         document.getElementById('choose').style.display = '';
-      }, 90); // выбор появляется сразу
-    }, 370); // вся сцена — 0.32+0.05=~0.37сек
+      }, 90);
+    }, 370);
   }, 200);
 };
 
 window.showChick = function (type) {
   document.getElementById('choose').style.display = 'none';
   document.getElementById('result').style.display = '';
-  let out = "";
-  let msg = "";
+  let out = "", msg = "";
   if (type === 'alien') {
     out = `
       <svg viewBox="0 0 140 180" class="chick-svg" style="margin:0 auto;">
@@ -33,7 +31,6 @@ window.showChick = function (type) {
         <ellipse cx="95" cy="98" rx="5" ry="8" fill="#5a64c9"/>
         <ellipse cx="70" cy="108" rx="10" ry="5" fill="#7ad1fd"/>
         <polygon points="70,116 64,124 76,124" fill="#fffacc"/>
-        <!-- Ушки-антенки -->
         <ellipse cx="35" cy="60" rx="7" ry="13" fill="#cdf7fd" transform="rotate(-20 35 60)"/>
         <ellipse cx="105" cy="60" rx="7" ry="13" fill="#cdf7fd" transform="rotate(20 105 60)"/>
         <circle cx="70" cy="60" r="4" fill="#fffad8"/>
@@ -51,17 +48,14 @@ window.showChick = function (type) {
         <ellipse cx="95" cy="93" rx="8" ry="12" fill="#34451c"/>
         <ellipse cx="52" cy="99" rx="5" ry="8" fill="#38bb68"/>
         <rect x="86" y="93" width="8" height="9" rx="3" fill="#fff"/>
-        <!-- Рот-шрам -->
         <rect x="60" y="120" width="19" height="4" rx="2" fill="#2a4f2a"/>
         <rect x="61" y="121" width="2" height="2" rx="1" fill="#fff"/>
         <rect x="68" y="121" width="2" height="2" rx="1" fill="#fff"/>
         <rect x="75" y="121" width="2" height="2" rx="1" fill="#fff"/>
         <rect x="79" y="121" width="2" height="2" rx="1" fill="#fff"/>
-        <!-- Бинтик -->
         <rect x="40" y="77" width="18" height="5" rx="2" fill="#dadada"/>
         <rect x="43" y="79" width="6" height="2.2" rx="1.1" fill="#a5a5a5"/>
         <rect x="49" y="78" width="6" height="2.2" rx="1.1" fill="#a5a5a5"/>
-        <!-- Шрамик -->
         <rect x="95" y="120" width="14" height="3" rx="1.2" fill="#5aad62" transform="rotate(-14 102 122)"/>
       </svg>
     `;
@@ -72,7 +66,6 @@ window.showChick = function (type) {
 };
 
 window.restart = function () {
-  // Сбросить всё
   document.getElementById('result').style.display = 'none';
   const egg = document.getElementById('egg');
   egg.style.transition = "none";
