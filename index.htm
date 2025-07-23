@@ -3,29 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <title>Мультик: яйцо и цыплёнок</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main>
-    <div class="cartoon-scene">
-      <div id="egg-container">
-        <div class="egg"></div>
-        <div class="crack" id="crack1"></div>
-        <div class="crack" id="crack2"></div>
+    <div class="cartoon-wrapper">
+      <div class="cartoon-scene">
+        <div id="egg-container">
+          <div class="egg"></div>
+          <div class="crack" id="crack1"></div>
+          <div class="crack" id="crack2"></div>
+        </div>
+        <div id="chicken" class="hide">
+          <div class="chick-head"></div>
+          <div class="chick-eye"></div>
+          <div class="chick-beak"></div>
+          <div class="chick-body"></div>
+          <div class="chick-wing left"></div>
+          <div class="chick-wing right"></div>
+          <div class="chick-leg left"></div>
+          <div class="chick-leg right"></div>
+        </div>
       </div>
-      <div id="chicken" class="hide">
-        <div class="chicken-head"></div>
-        <div class="chicken-eye"></div>
-        <div class="chicken-beak"></div>
-        <div class="chicken-body"></div>
-        <div class="chicken-wing left"></div>
-        <div class="chicken-wing right"></div>
-        <div class="chicken-leg left"></div>
-        <div class="chicken-leg right"></div>
-      </div>
+      <div id="caption">В одном уютном гнезде лежит яйцо...</div>
+      <button id="sound-btn" class="sound-btn">Включить звук</button>
     </div>
-    <div id="caption">...</div>
+    <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12f2881a18.mp3" preload="auto" loop></audio>
   </main>
   <script src="./script.js"></script>
 </body>
