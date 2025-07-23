@@ -4,45 +4,71 @@ const crack2 = document.getElementById('crack2');
 const eggContainer = document.getElementById('egg-container');
 const chicken = document.getElementById('chicken');
 const caption = document.getElementById('caption');
+const soundBtn = document.getElementById('sound-btn');
+const bgMusic = document.getElementById('bg-music');
 
-// Начальные подписи
 const captions = [
-  "В одном уютном гнезде лежит яйцо.",
-  "Оно ждёт своего часа и немного качается...",
-  "Слушай, кажется внутри что-то шевелится!",
-  "Вдруг на скорлупе появились трещинки...",
+  "В одном уютном гнезде лежит яйцо...",
+  "Яйцо покачивается сильнее — внутри кто-то есть!",
+  "Оно почти затихло... Но вдруг начинает подпрыгивать!",
+  "Появляется первая трещинка!",
+  "Скорлупа трещит всё больше...",
   "Ещё чуть-чуть...",
-  "Из яйца появляется цыплёнок! Ура!"
+  "Смотри, цыплёнок вылупился! Поздравляем!"
 ];
-
-// Тайминги для сцен (секунды)
-const timings = [0, 1.7, 3.5, 5, 6, 7.2];
 
 caption.textContent = captions[0];
 
+// --- Мелодия: по кнопке ---
+let musicStarted = false;
+soundBtn.addEventListener('click', function() {
+  bgMusic.currentTime = 0;
+  bgMusic.volume = 0.32;
+  bgMusic.play();
+  soundBtn.style.display = 'none';
+  musicStarted = true;
+});
+// Автоматически убрать кнопку, если пользователь сам запустил звук
+bgMusic.addEventListener('play', ()=> soundBtn.style.display='none');
+
 // Сцена 1 — просто яйцо качается
-setTimeout(() => { caption.textContent = captions[1]; }, 1100);
-// Сцена 2 — шевеление
-setTimeout(() => { caption.textContent = captions[2]; }, 1800);
-// Сцена 3 — появляются трещины
+setTimeout(() => { caption.textContent = captions[1]; }, 1400);
+// Сцена 2 — подпрыгивания
+setTimeout(() => { caption.textContent = captions[2]; }, 3400);
+// Сцена 3 — трещина
 setTimeout(() => {
   crack1.style.opacity = 1;
   eggContainer.classList.add('cracking');
   caption.textContent = captions[3];
-}, 3500);
+}, 5200);
 // Сцена 4 — вторая трещина
 setTimeout(() => {
   crack2.style.opacity = 1;
   caption.textContent = captions[4];
-}, 5000);
+}, 6400);
 // Сцена 5 — яйцо "открывается"
 setTimeout(() => {
   eggContainer.classList.remove('cracking');
   eggContainer.classList.add('open');
-}, 6000);
+  caption.textContent = captions[5];
+}, 7400);
 // Сцена 6 — появляется цыплёнок
 setTimeout(() => {
   chicken.classList.remove('hide');
-  caption.textContent = captions[5];
-  eggContainer.style.opacity = 0.3;
-}, 7200);
+  caption.textContent = captions[6];
+  eggContainer.style.opacity = 0.35;
+}, 9000);
+
+// --- Мелодия автозапуск, если можно ---
+window.addEventListener('touchstart', autoPlayOnce, {passive:true});
+window.addEventListener('mousedown', autoPlayOnce, {passive:true});
+function autoPlayOnce() {
+  if (!musicStarted) {
+    bgMusic.volume = 0.32;
+    bgMusic.play().catch(()=>{});
+    soundBtn.style.display = 'none';
+    musicStarted = true;
+  }
+  window.removeEventListener('touchstart', autoPlayOnce);
+  window.removeEventListener('mousedown', autoPlayOnce);
+}
