@@ -1,15 +1,17 @@
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
 const petMessage = document.getElementById('pet-message');
 const userInput = document.getElementById('user-input');
 const askBtn = document.getElementById('ask-btn');
 const chatLog = document.getElementById('chat-log');
 
-let pipeline, ready = false;
+let pipe, ready = false;
 
 async function initAI() {
   petMessage.textContent = "Курица размышляет...";
   logToConsole("Загружаем GPT-2 через transformers.js...");
   try {
-    pipeline = await window.transformers.pipeline('text-generation', 'Xenova/gpt2');
+    pipe = await pipeline('text-generation', 'Xenova/gpt2');
     ready = true;
     petMessage.textContent = "Курица готова! Спроси что-нибудь!";
     logToConsole("GPT-2 успешно загружена.");
@@ -34,7 +36,7 @@ askBtn.onclick = async function() {
   userInput.value = "";
 
   try {
-    const output = await pipeline(question, { max_new_tokens: 40 });
+    const output = await pipe(question, { max_new_tokens: 40 });
     let answer = output[0]?.generated_text.replace(question, '').trim().split('\n')[0] || '';
     if (answer.length < 3) answer = "Я не знаю...";
     petMessage.textContent = answer;
