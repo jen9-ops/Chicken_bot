@@ -1,61 +1,48 @@
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+const egg = document.querySelector('.egg');
+const crack1 = document.getElementById('crack1');
+const crack2 = document.getElementById('crack2');
+const eggContainer = document.getElementById('egg-container');
+const chicken = document.getElementById('chicken');
+const caption = document.getElementById('caption');
 
-const petMessage = document.getElementById('pet-message');
-const userInput = document.getElementById('user-input');
-const askBtn = document.getElementById('ask-btn');
-const chatLog = document.getElementById('chat-log');
+// Начальные подписи
+const captions = [
+  "В одном уютном гнезде лежит яйцо.",
+  "Оно ждёт своего часа и немного качается...",
+  "Слушай, кажется внутри что-то шевелится!",
+  "Вдруг на скорлупе появились трещинки...",
+  "Ещё чуть-чуть...",
+  "Из яйца появляется цыплёнок! Ура!"
+];
 
-let pipe, ready = false;
+// Тайминги для сцен (секунды)
+const timings = [0, 1.7, 3.5, 5, 6, 7.2];
 
-async function initAI() {
-  petMessage.textContent = "Курица размышляет...";
-  logToConsole("Загружаем GPT-2 через transformers.js...");
-  try {
-    pipe = await pipeline('text-generation', 'Xenova/gpt2');
-    ready = true;
-    petMessage.textContent = "Курица готова! Спроси что-нибудь!";
-    logToConsole("GPT-2 успешно загружена.");
-  } catch (err) {
-    petMessage.textContent = "Ошибка загрузки AI 😢";
-    logToConsole("Ошибка загрузки GPT-2: " + (err.message || err), true);
-  }
-}
-initAI();
+caption.textContent = captions[0];
 
-askBtn.onclick = async function() {
-  const question = userInput.value.trim();
-  if (!ready) {
-    petMessage.textContent = "Подожди, курица думает...";
-    logToConsole("AI ещё не загружен.");
-    return;
-  }
-  if (!question) return;
-  logToConsole("Вопрос курице: " + question);
-  chatAdd("user", "Ты: " + question);
-  petMessage.textContent = "Курица думает...";
-  userInput.value = "";
-
-  try {
-    const output = await pipe(question, { max_new_tokens: 40 });
-    let answer = output[0]?.generated_text.replace(question, '').trim().split('\n')[0] || '';
-    if (answer.length < 3) answer = "Я не знаю...";
-    petMessage.textContent = answer;
-    chatAdd("ai", "Курица: " + answer);
-    logToConsole("Ответ курицы: " + answer);
-  } catch (err) {
-    petMessage.textContent = "Что-то пошло не так...";
-    chatAdd("err", "Ошибка: " + (err.message || err));
-    logToConsole("Ошибка ответа AI: " + (err.message || err), true);
-  }
-};
-userInput.addEventListener('keydown', function(e){
-  if(e.key === "Enter") askBtn.click();
-});
-
-function chatAdd(type, msg) {
-  const d = document.createElement('div');
-  d.className = type;
-  d.textContent = msg;
-  chatLog.appendChild(d);
-  chatLog.scrollTop = chatLog.scrollHeight;
-}
+// Сцена 1 — просто яйцо качается
+setTimeout(() => { caption.textContent = captions[1]; }, 1100);
+// Сцена 2 — шевеление
+setTimeout(() => { caption.textContent = captions[2]; }, 1800);
+// Сцена 3 — появляются трещины
+setTimeout(() => {
+  crack1.style.opacity = 1;
+  eggContainer.classList.add('cracking');
+  caption.textContent = captions[3];
+}, 3500);
+// Сцена 4 — вторая трещина
+setTimeout(() => {
+  crack2.style.opacity = 1;
+  caption.textContent = captions[4];
+}, 5000);
+// Сцена 5 — яйцо "открывается"
+setTimeout(() => {
+  eggContainer.classList.remove('cracking');
+  eggContainer.classList.add('open');
+}, 6000);
+// Сцена 6 — появляется цыплёнок
+setTimeout(() => {
+  chicken.classList.remove('hide');
+  caption.textContent = captions[5];
+  eggContainer.style.opacity = 0.3;
+}, 7200);
