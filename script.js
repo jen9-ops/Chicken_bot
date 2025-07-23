@@ -1,119 +1,97 @@
-// ----- Звёзды -----
-const stars = document.getElementById('stars');
-function addStars(num = 28) {
-  stars.innerHTML = '';
-  for (let i = 0; i < num; i++) {
-    let r = Math.random();
-    let x = Math.random() * 420;
-    let y = Math.random() * 240 + 10;
-    let s = 1.0 + Math.random() * 1.4;
-    let o = 0.33 + Math.random() * 0.55;
-    let c = r > 0.8 ? "#f5ffcf" : r > 0.6 ? "#b9e3f9" : "#fff";
-    let shape = Math.random() > 0.9
-      ? `<polygon points="${x},${y} ${x+s},${y+s*2.2} ${x-s},${y+s*2.2}" fill="${c}" opacity="${o}"/>`
-      : `<ellipse cx="${x}" cy="${y}" rx="${s}" ry="${s*0.83}" fill="${c}" opacity="${o}"/>`;
-    stars.innerHTML += shape;
+window.onload = function () {
+  // Яйцо падает быстро
+  setTimeout(() => {
+    const egg = document.getElementById('egg');
+    egg.style.transition = "transform 0.32s cubic-bezier(.7,1.7,.3,1)";
+    egg.style.transform = "translateY(115px) scale(.92)";
+    setTimeout(() => {
+      document.getElementById('eggGlow').setAttribute('opacity', '0.32');
+      document.getElementById('eggCrack').setAttribute('opacity', '1');
+    }, 120); // трещина почти сразу
+    setTimeout(() => {
+      egg.style.opacity = 0;
+      setTimeout(() => {
+        document.getElementById('choose').style.display = '';
+      }, 90); // выбор появляется сразу
+    }, 370); // вся сцена — 0.32+0.05=~0.37сек
+  }, 200);
+};
+
+window.showChick = function (type) {
+  document.getElementById('choose').style.display = 'none';
+  document.getElementById('result').style.display = '';
+  let out = "";
+  let msg = "";
+  if (type === 'alien') {
+    out = `
+      <svg viewBox="0 0 140 180" class="chick-svg" style="margin:0 auto;">
+        <ellipse cx="70" cy="92" rx="52" ry="56" fill="#a2e1fe" stroke="#59b0e8" stroke-width="6"/>
+        <ellipse cx="70" cy="138" rx="38" ry="32" fill="#63f0fa" stroke="#2ea9b8" stroke-width="4"/>
+        <ellipse cx="45" cy="92" rx="12" ry="16" fill="#fff"/>
+        <ellipse cx="95" cy="92" rx="12" ry="16" fill="#fff"/>
+        <ellipse cx="45" cy="98" rx="5" ry="8" fill="#5a64c9"/>
+        <ellipse cx="95" cy="98" rx="5" ry="8" fill="#5a64c9"/>
+        <ellipse cx="70" cy="108" rx="10" ry="5" fill="#7ad1fd"/>
+        <polygon points="70,116 64,124 76,124" fill="#fffacc"/>
+        <!-- Ушки-антенки -->
+        <ellipse cx="35" cy="60" rx="7" ry="13" fill="#cdf7fd" transform="rotate(-20 35 60)"/>
+        <ellipse cx="105" cy="60" rx="7" ry="13" fill="#cdf7fd" transform="rotate(20 105 60)"/>
+        <circle cx="70" cy="60" r="4" fill="#fffad8"/>
+        <circle cx="50" cy="47" r="3" fill="#e1fffd"/>
+        <circle cx="90" cy="47" r="3" fill="#e1fffd"/>
+      </svg>
+    `;
+    msg = `<b>Поздравляем!</b><br>Ты выбрал <span style="color:#43c6e4;">инопланетного цыплёнка</span> 🚀`;
+  } else if (type === 'zombie') {
+    out = `
+      <svg viewBox="0 0 140 180" class="chick-svg" style="margin:0 auto;">
+        <ellipse cx="70" cy="92" rx="52" ry="56" fill="#b1ffb3" stroke="#3a8540" stroke-width="6"/>
+        <ellipse cx="70" cy="138" rx="38" ry="32" fill="#84e884" stroke="#397442" stroke-width="4"/>
+        <ellipse cx="50" cy="95" rx="12" ry="15" fill="#fff"/>
+        <ellipse cx="95" cy="93" rx="8" ry="12" fill="#34451c"/>
+        <ellipse cx="52" cy="99" rx="5" ry="8" fill="#38bb68"/>
+        <rect x="86" y="93" width="8" height="9" rx="3" fill="#fff"/>
+        <!-- Рот-шрам -->
+        <rect x="60" y="120" width="19" height="4" rx="2" fill="#2a4f2a"/>
+        <rect x="61" y="121" width="2" height="2" rx="1" fill="#fff"/>
+        <rect x="68" y="121" width="2" height="2" rx="1" fill="#fff"/>
+        <rect x="75" y="121" width="2" height="2" rx="1" fill="#fff"/>
+        <rect x="79" y="121" width="2" height="2" rx="1" fill="#fff"/>
+        <!-- Бинтик -->
+        <rect x="40" y="77" width="18" height="5" rx="2" fill="#dadada"/>
+        <rect x="43" y="79" width="6" height="2.2" rx="1.1" fill="#a5a5a5"/>
+        <rect x="49" y="78" width="6" height="2.2" rx="1.1" fill="#a5a5a5"/>
+        <!-- Шрамик -->
+        <rect x="95" y="120" width="14" height="3" rx="1.2" fill="#5aad62" transform="rotate(-14 102 122)"/>
+      </svg>
+    `;
+    msg = `<b>Класс!</b><br>Ты выбрал <span style="color:#1ab141;">зомби-цыплёнка</span> 🧟‍♂️`;
   }
-}
-addStars();
+  document.getElementById('chosen').innerHTML = out;
+  document.getElementById('msg').innerHTML = msg;
+};
 
-const comet = document.getElementById('comet');
-const eggGroup = document.getElementById('eggGroup');
-const eggMain = document.getElementById('eggMain');
-const eggGlow = document.getElementById('eggGlow');
-const crack1 = document.getElementById('crack1');
-const crack2 = document.getElementById('crack2');
-const chickGroup = document.getElementById('chickGroup');
-const caption = document.getElementById('caption');
-const choicePanel = document.getElementById('choicePanel');
-const finalPanel = document.getElementById('finalPanel');
-const restartBtn = document.getElementById('restartBtn');
-
-function resetScene() {
-  comet.setAttribute('transform', '');
-  eggGroup.setAttribute('transform', '');
-  eggGroup.style.opacity = '1';
-  eggMain.setAttribute('fill', 'url(#egg-grad)');
-  eggGlow.setAttribute('opacity', '0');
-  crack1.setAttribute('opacity', '0');
-  crack2.setAttribute('opacity', '0');
-  chickGroup.setAttribute('opacity', '0');
-  caption.textContent = "С неба падает загадочный метеорит...";
-  choicePanel.classList.add('hide');
-  finalPanel.classList.add('hide');
-}
-
-function playIntro() {
-  resetScene();
-  // Быстрая анимация падения метеорита
-  comet.animate([
-    { transform: "translate(0,0)" },
-    { transform: "translate(90px,320px)" }
-  ], { duration: 650, fill: "forwards", easing: "ease-in" });
-  setTimeout(()=>comet.setAttribute('transform', 'translate(90,320)'), 650);
-
+window.restart = function () {
+  // Сбросить всё
+  document.getElementById('result').style.display = 'none';
+  const egg = document.getElementById('egg');
+  egg.style.transition = "none";
+  egg.style.transform = "";
+  egg.style.opacity = 1;
+  document.getElementById('eggGlow').setAttribute('opacity', '0.18');
+  document.getElementById('eggCrack').setAttribute('opacity', '0');
   setTimeout(() => {
-    caption.textContent = "Это оказалось необычное космическое яйцо!";
-    eggGlow.setAttribute('opacity', '0.34');
-    eggGlow.animate([{ opacity: 0.11 }, { opacity: 0.44 }, { opacity: 0.17 }], {duration: 700, iterations: 2});
-  }, 680);
-
-  setTimeout(() => {
-    caption.textContent = "Яйцо трещит, кто там внутри?..";
-    crack1.setAttribute('opacity', '1');
-    eggGroup.animate([{transform: "rotate(-9 210 300)"},{transform: "rotate(10 210 300)"},{transform: "rotate(0 210 300)"}],{duration:500});
-  }, 1180);
-
-  setTimeout(() => {
-    crack2.setAttribute('opacity', '1');
-    eggGlow.setAttribute('opacity', '0.17');
-    eggMain.setAttribute('fill', '#fffde6');
-    eggGroup.animate([{transform: "translate(0,0)"},{transform: "translate(-10,6)"}],{duration:360});
-  }, 1540);
-
-  setTimeout(() => {
-    // Появляется цыплёнок
-    eggGlow.setAttribute('opacity', '0');
-    chickGroup.setAttribute('opacity', '1');
-    caption.textContent = "Кто вылупился из космического яйца?";
-    showChick("alien");
-    chickGroup.animate([
-      { opacity: 0, transform: "translateY(70px) scale(0.82)" },
-      { opacity: 1, transform: "translateY(0px) scale(1.1)" },
-      { opacity: 1, transform: "translateY(-7px) scale(1.04)" },
-      { opacity: 1, transform: "translateY(0px) scale(1.00)" }
-    ], { duration: 700, easing: "cubic-bezier(.57,1.35,.62,1)" });
-    eggGroup.style.opacity = "0.16";
-  }, 1910);
-
-  setTimeout(() => {
-    caption.textContent = "";
-    choicePanel.classList.remove('hide');
-  }, 2710);
-}
-
-function showChick(style) {
-  // Очистка старых декоров
-  Array.from(chickGroup.querySelectorAll('.alienStar, .zombieScar, .zombieEye')).forEach(e=>e.remove());
-  // Элементы цыплёнка
-  let head = document.getElementById('chickHead');
-  let body = document.getElementById('chickBody');
-  let beak = document.getElementById('chickBeak');
-  let eyeL = document.getElementById('chickEyeL');
-  let eyeR = document.getElementById('chickEyeR');
-  let pupilL = document.getElementById('chickPupilL');
-  let pupilR = document.getElementById('chickPupilR');
-  let wingL = document.getElementById('chickWingL');
-  let wingR = document.getElementById('chickWingR');
-
-  if (style === "alien") {
-    head.setAttribute('fill', "url(#egg-grad)");
-    head.setAttribute('stroke', "#43c6e4");
-    body.setAttribute('fill', "#c6f7ff");
-    body.setAttribute('stroke', "#43c6e4");
-    wingL.setAttribute('fill', "#bbf3ff");
-    wingR.setAttribute('fill', "#bbf3ff");
-    beak.setAttribute('fill', "#8fd8ff");
-    beak.setAttribute('stroke', "#0e87b9");
-    eyeL.setAttribute('fill', "#fff");
-    eyeR.setAttribute('fill', "#fff");
+    egg.style.transition = "transform 0.32s cubic-bezier(.7,1.7,.3,1)";
+    egg.style.transform = "translateY(115px) scale(.92)";
+    setTimeout(() => {
+      document.getElementById('eggGlow').setAttribute('opacity', '0.32');
+      document.getElementById('eggCrack').setAttribute('opacity', '1');
+    }, 120);
+    setTimeout(() => {
+      egg.style.opacity = 0;
+      setTimeout(() => {
+        document.getElementById('choose').style.display = '';
+      }, 90);
+    }, 370);
+  }, 200);
+};
