@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Русский ИИ-цыплёнок (transformers.js)</title>
+<title>Русский ИИ-Цыплёнок (локальный transformers.js)</title>
 <style>
   :root { --size: 192; }
   body{margin:0;background:#0f1115;color:#e8e8ea;font-family:system-ui,Segoe UI,Arial}
@@ -33,9 +33,9 @@
 <body>
 <div class="layout">
   <div class="card" id="stage">
-    <canvas id="chick" width="192" height="192"></canvas>
+    <canvas id="chick" width="192" height="192" aria-label="анимация цыплёнка"></canvas>
 
-    <div id="loader" class="card">
+    <div id="loader" class="card" role="status" aria-live="polite">
       <div class="row"><span class="name">ru→en</span><div class="bar"><i id="pb-ruen"></i></div><span class="pct" id="tx-ruen">0%</span></div>
       <div class="row"><span class="name">LLM</span><div class="bar"><i id="pb-gen"></i></div><span class="pct" id="tx-gen">0%</span></div>
       <div class="row"><span class="name">en→ru</span><div class="bar"><i id="pb-enru"></i></div><span class="pct" id="tx-enru">0%</span></div>
@@ -44,7 +44,7 @@
       <div><small>Ошибки:</small><pre id="errors"></pre></div>
     </div>
 
-    <div class="btns">
+    <div class="btns" aria-label="управление эмоциями">
       <button type="button" data-act="idle">Спокойный</button>
       <button type="button" data-act="happy">Рад</button>
       <button type="button" data-act="angry">Злится</button>
@@ -59,19 +59,28 @@
       <input id="q" type="text" placeholder="Спросите цыплёнка по-русски…" autocomplete="off"/>
       <button id="send" type="submit">Отправить</button>
     </form>
-    <small>Модели: <code>Xenova/opus-mt-ru-en</code>, <code>Xenova/distilgpt2</code>, <code>Xenova/opus-mt-en-ru</code>, <code>Xenova/distilbert-base-uncased-finetuned-sst-2-english</code>.</small>
+    <small>Модели: <code>Xenova/opus-mt-ru-en</code>, <code>Xenova/distilgpt2</code>, <code>Xenova/opus-mt-en-ru</code>, <code>Xenova/distilbert-base-uncased-finetuned-sst-2-english</code>. Всё в браузере.</small>
   </div>
 </div>
 
 <script type="module">
-import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js";
+/*
+  ВАЖНО:
+  1) transformers.min.js и файлы ort-wasm*.wasm/ort-wasm-worker.js лежат РЯДОМ с этим HTML.
+  2) Откройте страницу через http-сервер (например: python -m http.server 8000).
+*/
+import { pipeline, env } from "./transformers.min.js";
+
+/* ===== ПУТИ И НАСТРОЙКИ ===== */
+env.allowRemoteModels = true;     // модели подгружаются из CDN
+env.backends.onnx.wasm.wasmPaths = "./"; // wasm-файлы лежат рядом с HTML
 
 /* ===== Настройки спрайта ===== */
-const SPRITE_SRC = "./chick_4x4.png"; // <-- ЗАМЕНИТЕ на ваш путь
+const SPRITE_SRC = "chick_4x4.png"; // <-- ЗАМЕНИТЕ на ваш путь к спрайту 4×4
 const COLS = 4, FRAME = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--size'))||192;
 const animations = { idle:[0,1,2,3], talk:[4,5,6,7], happy:[8,9,10,11], angry:[12,13,14,15] };
 
-/* ===== Канвас + fallback-рисунок пока нет спрайта ===== */
+/* ===== Канвас и fallback ===== */
 const canvas = document.getElementById('chick');
 const ctx = canvas.getContext('2d');
 function drawFallback() {
@@ -86,25 +95,26 @@ function drawFallback() {
 }
 drawFallback();
 
-/* ===== Прогресс и лог ошибок ===== */
-const E = document.getElementById('errors');
-function logErr(e){ E.textContent += (e?.stack || e?.message || e) + "\n"; console.error(e); }
+/* ===== Лог ошибок и прогресс ===== */
+const ERR = document.getElementById('errors');
+function logErr(e){ ERR.textContent += (e?.stack || e?.message || e) + "\n"; console.error(e); }
+window.addEventListener('error', ev => logErr(ev.error || ev.message));
+window.addEventListener('unhandledrejection', ev => logErr(ev.reason || ev));
+
 const P = id => ({ bar:document.getElementById("pb-"+id), txt:document.getElementById("tx-"+id) });
 const pb = { ruen:P("ruen"), gen:P("gen"), enru:P("enru"), sent:P("sent") };
 function onProgress(which){
   const h = pb[which];
   return (p)=>{
-    const pct = p.total? Math.min(100, Math.round(100*p.loaded/p.total)) : (p.progress? Math.round(100*p.progress) : 0);
+    const pct = p.total? Math.min(100, Math.round(100*p.loaded/p.total))
+                        : (p.progress? Math.round(100*p.progress) : 0);
     if (h.bar) h.bar.style.width = (pct||0) + "%";
     if (h.txt) h.txt.textContent = (pct||0) + "%";
   };
 }
 
-/* ===== Конфиг transformers.js ===== */
-env.allowRemoteModels = true;
-env.backends.onnx.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/";
-
-const status = document.getElementById('status');
+/* ===== Загрузка моделей ===== */
+const statusEl = document.getElementById('status');
 let translateRUEN, generator, translateENRU, sentiment;
 
 async function loadAll(){
@@ -117,12 +127,13 @@ async function loadAll(){
 }
 await loadAll();
 
-/* ===== Спрайт (если есть) ===== */
+/* ===== Загрузка спрайта ===== */
 const img = new Image();
 img.src = SPRITE_SRC;
 img.addEventListener('error', ()=> logErr("Не удалось загрузить спрайт: " + SPRITE_SRC));
-await img.decode().catch(()=>{ /* останется fallback */ });
+await img.decode().catch(()=>{/* останется fallback */});
 
+/* ===== Анимация ===== */
 let state="idle", frameIdx=0, last=0, fps=8;
 function drawFrame(i){
   const sx=(i%COLS)*FRAME, sy=Math.floor(i/COLS)*FRAME;
@@ -138,8 +149,10 @@ function loop(ts){
 }
 drawFrame(animations[state][0]);
 requestAnimationFrame(loop);
+
+/* ===== Готово к работе ===== */
 document.getElementById('loader').classList.add('hide');
-status.textContent="Готов! Говорите со мной по-русски 🐣";
+statusEl.textContent="Готов! Говорите со мной по-русски 🐣";
 
 /* ===== Чат ===== */
 const log = document.getElementById('log'), q=document.getElementById('q'), sendBtn=document.getElementById('send');
@@ -147,21 +160,21 @@ function addMsg(text,who="ai"){ const d=document.createElement('div'); d.classNa
 
 async function reply(userText){
   try{
-    state="talk"; sendBtn.disabled=true; status.textContent="Думаю…";
+    state="talk"; sendBtn.disabled=true; statusEl.textContent="Думаю…";
     addMsg(userText,"me");
 
-    // 1) Переводим запрос на EN
+    // 1) Перевод RU -> EN
     let enPrompt = userText;
     try { enPrompt = (await translateRUEN(userText))[0].translation_text || enPrompt; } catch(e){ logErr(e); }
 
-    // 2) Сентимент (на англ. тексте)
+    // 2) Сентимент по англ. тексту
     let mood="NEUTRAL";
     try {
       const s = await sentiment(enPrompt);
       mood = s[0]?.label || "NEUTRAL"; // POSITIVE/NEGATIVE
     } catch(e){ logErr(e); }
 
-    // 3) Генерация
+    // 3) Генерация (краткий персонаж)
     const persona = "You are Cheepy, a cute cartoon zombie chick. Answer briefly (1 short sentence).";
     const prompt  = `${persona}\nHuman: ${enPrompt}\nCheepy:`;
     let enAnswer="";
@@ -170,7 +183,7 @@ async function reply(userText){
       enAnswer = (out[0].generated_text||"").replace(prompt,"").trim();
     } catch(e){ logErr(e); enAnswer="(I chirp silently)"; }
 
-    // 4) Перевод ответа на RU
+    // 4) Перевод EN -> RU
     let ruAnswer = enAnswer;
     try { ruAnswer = (await translateENRU(enAnswer))[0].translation_text || ruAnswer; } catch(e){ logErr(e); }
 
@@ -178,8 +191,8 @@ async function reply(userText){
     state = (mood==="POSITIVE") ? "happy" : (mood==="NEGATIVE") ? "angry" : "idle";
 
     addMsg("🐣 "+ruAnswer,"ai");
-    status.textContent="Готов!";
-  } catch(e){ logErr(e); status.textContent="Ошибка"; }
+    statusEl.textContent="Готов!";
+  } catch(e){ logErr(e); statusEl.textContent="Ошибка"; }
   finally{ sendBtn.disabled=false; }
 }
 
