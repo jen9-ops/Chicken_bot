@@ -1,205 +1,499 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Русский ИИ-Цыплёнок (локальный transformers.js)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ИИ-Цыплёнок – полный код с загрузчиком</title>
+
+<!-- W3.CSS (для базовой сетки) -->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
 <style>
-  :root { --size: 192; }
-  body{margin:0;background:#0f1115;color:#e8e8ea;font-family:system-ui,Segoe UI,Arial}
-  .layout{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:260px 1fr}
-  .card{background:#161a22;border:1px solid #252a35;border-radius:14px;padding:12px}
-  #stage{display:flex;flex-direction:column;align-items:center;gap:10px}
-  canvas{width:calc(var(--size)*1px);height:calc(var(--size)*1px);background:#0b0e14;border-radius:10px;image-rendering:pixelated}
-  .btns{display:flex;gap:8px;flex-wrap:wrap}
-  button{background:#232a36;border:1px solid #313a49;color:#e8e8ea;border-radius:10px;padding:8px 10px;cursor:pointer}
-  button:disabled{opacity:.6;cursor:progress}
-  #log{height:360px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-  .msg{background:#1b2130;border:1px solid #293247;padding:8px 10px;border-radius:10px}
-  .me{align-self:flex-end;background:#17324d;border-color:#1e415f}
-  form{display:flex;gap:8px}
-  input[type="text"]{flex:1;padding:10px;border-radius:10px;border:1px solid #2a3241;background:#121722;color:#e8e8ea}
-  small{opacity:.75}
-  #loader{display:flex;flex-direction:column;gap:10px;width:100%}
-  .row{display:grid;grid-template-columns:92px 1fr 48px;gap:8px;align-items:center}
-  .name{font-size:14px;opacity:.85}
-  .bar{height:10px;background:#0e1320;border-radius:8px;overflow:hidden;border:1px solid #2a3241}
-  .bar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#3d7bfd,#7aa2ff)}
-  .pct{font-variant-numeric:tabular-nums;text-align:right}
-  .hide{display:none!important}
-  #errors{white-space:pre-wrap;background:#1e1e1e;border:1px solid #333;border-radius:10px;padding:8px;max-height:160px;overflow:auto}
+  :root{
+    --size:192;
+    --bg:#0e1217;
+    --card:rgba(20,26,34,.75);
+    --text:#eaeef5;
+    --muted:#9aa5c1;
+    --accent:#4da3ff;
+    --accent2:#7ae0ff;
+    --radius:14px;
+    --shadow:0 16px 40px rgba(0,0,0,.35);
+    --ring:0 0 0 3px rgba(77,163,255,.35);
+  }
+  [data-theme="neon"]{
+    --bg:#0a0612; --card:rgba(18,10,30,.75); --text:#f2e9ff; --muted:#d1c4e9;
+    --accent:#b26bff; --accent2:#5ef1ff;
+  }
+  [data-theme="emerald"]{
+    --bg:#07130f; --card:rgba(10,22,18,.75); --text:#e9fff6; --muted:#bce3d6;
+    --accent:#1fd899; --accent2:#76ffd1;
+  }
+  [data-theme="solar"]{
+    --bg:#0f0f0a; --card:rgba(28,26,18,.75); --text:#fff6db; --muted:#e6dab0;
+    --accent:#ffb84d; --accent2:#ffd37a;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family: system-ui,-apple-system,BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height:100vh;
+  }
+  .app{max-width:1160px;margin:0 auto;padding:16px;display:grid;gap:20px;}
+  .topbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 16px;
+    background:rgba(255,255,255,.03);
+    border-radius:12px;
+    margin-bottom:8px;
+    position:sticky;
+    top:0;
+    z-index:5;
+    backdrop-filter:blur(6px);
+  }
+  .brand{display:flex;gap:10px;align-items:center;}
+  .logo{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid; place-items:center;
+    font-size:20px;
+    font-weight:700;
+    color:#0e1217;
+    box-shadow: var(--shadow);
+  }
+  .title{font-size:1.1rem;font-weight:700;margin:0;line-height:1;}
+  .subtitle{font-size:.75rem;color:var(--muted);margin:0;}
+
+  .theme-picker{display:flex;gap:8px;align-items:center;}
+  .theme-dot{
+    width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.15);cursor:pointer;
+    position:relative;
+  }
+  .t-dark{background:linear-gradient(135deg,#1f2739,#0f1217);}
+  .t-neon{background:linear-gradient(135deg,#b26bff,#5ef1ff);}
+  .t-emerald{background:linear-gradient(135deg,#1fd899,#76ffd1);}
+  .t-solar{background:linear-gradient(135deg,#ffb84d,#ffd37a);}
+
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:18px;}
+  @media (max-width: 950px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{
+    background: var(--card);
+    border-radius: var(--radius);
+    padding:16px;
+    position:relative;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .canvas-wrapper{
+    display:flex;
+    justify-content:center;
+    margin-bottom:6px;
+  }
+  canvas{
+    width:calc(var(--size)*1px);
+    height:calc(var(--size)*1px);
+    border-radius:12px;
+    background:#0b0f15;
+    image-rendering:pixelated;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+
+  .progress-group{display:grid;gap:6px;margin-top:6px;}
+  .progress-row{display:grid; grid-template-columns:80px 1fr 40px; gap:8px; align-items:center;}
+  .label{font-size:12px;color:var(--muted);}
+  .bar{
+    position:relative;
+    height:10px;
+    border-radius:8px;
+    background:rgba(255,255,255,.06);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .bar>i{
+    display:block;
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transition:width .2s ease-out;
+  }
+  .pct{font-size:11px;text-align:right;color:var(--muted);}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+  .btn{padding:8px 12px;border:none;border-radius:10px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px; background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.02));color:var(--text);}
+  .btn.active{box-shadow: var(--ring);}
+  .status{font-size:12px;margin-top:4px;color:var(--muted);}
+
+  .chat{display:flex;flex-direction:column;gap:12px;}
+  .log{flex:1;overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);}
+  .bubble{display:inline-block;max-width:80%;padding:10px 14px;border-radius:16px;margin:6px 0;position:relative;font-size:14px;line-height:1.3;word-break:break-word;}
+  .me{margin-left:auto;background:rgba(255,255,255,.10);color:#000;}
+  .ai{margin-right:auto;background:rgba(255,255,255,.03);}
+  .input-row{display:grid;grid-template-columns:1fr 140px;gap:10px;margin-top:4px;}
+  input[type="text"]{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.25);color:var(--text);font-size:14px;outline:none; width:100%;}
+  input:focus{box-shadow: var(--ring);}
+  .send-btn{background:var(--accent);border:none;color:#0e1217;font-weight:700;border-radius:12px;cursor:pointer;padding:12px;}
+  .small{font-size:11px;color:var(--muted);margin-top:4px;}
+  details{margin-top:8px;}
+  summary{cursor:pointer;font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
-<div class="layout">
-  <div class="card" id="stage">
-    <canvas id="chick" width="192" height="192" aria-label="анимация цыплёнка"></canvas>
 
-    <div id="loader" class="card" role="status" aria-live="polite">
-      <div class="row"><span class="name">ru→en</span><div class="bar"><i id="pb-ruen"></i></div><span class="pct" id="tx-ruen">0%</span></div>
-      <div class="row"><span class="name">LLM</span><div class="bar"><i id="pb-gen"></i></div><span class="pct" id="tx-gen">0%</span></div>
-      <div class="row"><span class="name">en→ru</span><div class="bar"><i id="pb-enru"></i></div><span class="pct" id="tx-enru">0%</span></div>
-      <div class="row"><span class="name">Sentiment</span><div class="bar"><i id="pb-sent"></i></div><span class="pct" id="tx-sent">0%</span></div>
-      <small id="load-note">Загрузка моделей… (кешируются в браузере)</small>
-      <div><small>Ошибки:</small><pre id="errors"></pre></div>
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">🐣</div>
+    <div style="display:flex;flex-direction:column;">
+      <div class="title">ИИ-Цыплёнок</div>
+      <div class="subtitle">Локально с transformers.js · RU ⇄ EN</div>
     </div>
-
-    <div class="btns" aria-label="управление эмоциями">
-      <button type="button" data-act="idle">Спокойный</button>
-      <button type="button" data-act="happy">Рад</button>
-      <button type="button" data-act="angry">Злится</button>
-      <button type="button" data-act="talk">Говорит</button>
-    </div>
-    <small id="status">Готовлюсь…</small>
   </div>
+  <div class="theme-picker">
+    <div class="subtitle" style="margin-right:6px;">Тема:</div>
+    <div class="theme-dot t-dark" title="Dark" data-theme="dark"></div>
+    <div class="theme-dot t-neon" title="Neon" data-theme="neon"></div>
+    <div class="theme-dot t-emerald" title="Emerald" data-theme="emerald"></div>
+    <div class="theme-dot t-solar" title="Solar" data-theme="solar"></div>
+  </div>
+</div>
 
-  <div class="card">
-    <div id="log" aria-live="polite"></div>
-    <form id="chat">
-      <input id="q" type="text" placeholder="Спросите цыплёнка по-русски…" autocomplete="off"/>
-      <button id="send" type="submit">Отправить</button>
-    </form>
-    <small>Модели: <code>Xenova/opus-mt-ru-en</code>, <code>Xenova/distilgpt2</code>, <code>Xenova/opus-mt-en-ru</code>, <code>Xenova/distilbert-base-uncased-finetuned-sst-2-english</code>. Всё в браузере.</small>
+<div class="app">
+  <div class="grid">
+    <!-- Левая панель: цыплёнок + загрузка + эмоции -->
+    <div class="card">
+      <div class="canvas-wrapper">
+        <canvas id="chick" width="192" height="192" aria-label="анимация цыплёнка"></canvas>
+      </div>
+
+      <div>
+        <div class="status" id="load-status">Загрузка моделей…</div>
+        <div class="progress-group">
+          <div class="progress-row">
+            <div class="label">ru→en</div>
+            <div class="bar"><i id="pb-ruen"></i></div>
+            <div class="pct" id="pct-ruen">0%</div>
+          </div>
+          <div class="progress-row">
+            <div class="label">LLM</div>
+            <div class="bar"><i id="pb-gen"></i></div>
+            <div class="pct" id="pct-gen">0%</div>
+          </div>
+          <div class="progress-row">
+            <div class="label">en→ru</div>
+            <div class="bar"><i id="pb-enru"></i></div>
+            <div class="pct" id="pct-enru">0%</div>
+          </div>
+          <div class="progress-row">
+            <div class="label">Sentiment</div>
+            <div class="bar"><i id="pb-sent"></i></div>
+            <div class="pct" id="pct-sent">0%</div>
+          </div>
+        </div>
+        <div class="small">Модели кешируются; если какой-то прогресс завис, через 3 сек он доведётся до 100%.</div>
+        <details>
+          <summary>Ошибки (debug)</summary>
+          <pre id="errors" style="background:rgba(0,0,0,.2);padding:8px;border-radius:8px;overflow:auto;max-height:160px;"></pre>
+        </details>
+      </div>
+
+      <div class="controls">
+        <button class="btn" data-act="idle">Спокойный</button>
+        <button class="btn" data-act="happy">Рад</button>
+        <button class="btn" data-act="angry">Злится</button>
+        <button class="btn" data-act="talk">Говорит</button>
+      </div>
+      <div class="status" id="status">Готовлюсь...</div>
+    </div>
+
+    <!-- Правая панель: чат -->
+    <div class="card">
+      <div class="chat">
+        <div id="log" class="log"></div>
+        <form id="chat-form">
+          <div class="input-row">
+            <input id="q" type="text" placeholder="Спросите цыплёнка по-русски…" autocomplete="off"/>
+            <button id="send" type="submit" class="send-btn">Отправить</button>
+          </div>
+        </form>
+        <div class="small">Используются модели: Xenova/opus-mt-ru-en, Xenova/distilgpt2, Xenova/opus-mt-en-ru, Xenova/distilbert-base-uncased-finetuned-sst-2-english.</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script type="module">
-/*
-  ВАЖНО:
-  1) transformers.min.js и файлы ort-wasm*.wasm/ort-wasm-worker.js лежат РЯДОМ с этим HTML.
-  2) Откройте страницу через http-сервер (например: python -m http.server 8000).
-*/
+/* === тема сохраняется === */
+document.querySelectorAll('.theme-dot').forEach(el=>{
+  el.addEventListener('click', ()=> {
+    const t = el.dataset.theme;
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('chick_theme', t);
+  });
+});
+const savedTheme = localStorage.getItem('chick_theme');
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+/* === импорт локальной библиотеки === */
 import { pipeline, env } from "./transformers.min.js";
 
-/* ===== ПУТИ И НАСТРОЙКИ ===== */
-env.allowRemoteModels = true;     // модели подгружаются из CDN
-env.backends.onnx.wasm.wasmPaths = "./"; // wasm-файлы лежат рядом с HTML
+/* === конфиг === */
+env.allowRemoteModels = true;
+env.backends.onnx.wasm.wasmPaths = "./";
 
-/* ===== Настройки спрайта ===== */
-const SPRITE_SRC = "chick_4x4.png"; // <-- ЗАМЕНИТЕ на ваш путь к спрайту 4×4
-const COLS = 4, FRAME = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--size'))||192;
+/* === спрайт и анимации === */
+const SPRITE_SRC = "chick_4x4.png"; // заменить на свой спрайт
+const COLS = 4;
+const FRAME = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--size'))||192;
 const animations = { idle:[0,1,2,3], talk:[4,5,6,7], happy:[8,9,10,11], angry:[12,13,14,15] };
 
-/* ===== Канвас и fallback ===== */
 const canvas = document.getElementById('chick');
 const ctx = canvas.getContext('2d');
-function drawFallback() {
-  const s = FRAME;
-  ctx.clearRect(0,0,s,s);
-  ctx.fillStyle = "#1a2233"; ctx.fillRect(0,0,s,s);
-  ctx.translate(s/2, s/2);
-  ctx.fillStyle="#79d27d"; ctx.beginPath(); ctx.arc(0,20,60,0,Math.PI*2); ctx.fill(); // тело
-  ctx.fillStyle="#ffe08a"; ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(40,5); ctx.lineTo(0,20); ctx.closePath(); ctx.fill(); // клюв
-  ctx.fillStyle="#111"; ctx.beginPath(); ctx.arc(-20,0,10,0,Math.PI*2); ctx.arc(20,0,10,0,Math.PI*2); ctx.fill(); // глаза
-  ctx.setTransform(1,0,0,1,0,0);
+
+function drawFallback(){
+  ctx.save();
+  ctx.clearRect(0,0,FRAME,FRAME);
+  ctx.fillStyle="rgba(255,255,255,0.06)";
+  ctx.fillRect(0,0,FRAME,FRAME);
+  ctx.translate(FRAME/2, FRAME/2);
+  ctx.fillStyle="#79d27d";
+  ctx.beginPath();
+  ctx.arc(0,20,60,0,Math.PI*2); ctx.fill(); // тело
+  ctx.fillStyle="#ffe08a";
+  ctx.beginPath();
+  ctx.moveTo(0,-10);
+  ctx.lineTo(40,5);
+  ctx.lineTo(0,20);
+  ctx.closePath(); ctx.fill(); // клюв
+  ctx.fillStyle="#111";
+  ctx.beginPath();
+  ctx.arc(-20,0,10,0,Math.PI*2); ctx.arc(20,0,10,0,Math.PI*2); ctx.fill(); // глаза
+  ctx.restore();
 }
 drawFallback();
 
-/* ===== Лог ошибок и прогресс ===== */
-const ERR = document.getElementById('errors');
-function logErr(e){ ERR.textContent += (e?.stack || e?.message || e) + "\n"; console.error(e); }
+/* === прогресс и ошибки === */
+const errorsEl = document.getElementById('errors');
+function logErr(e){ errorsEl.textContent += (e?.stack||e?.message||String(e)) + "\n"; console.error(e); }
 window.addEventListener('error', ev => logErr(ev.error || ev.message));
 window.addEventListener('unhandledrejection', ev => logErr(ev.reason || ev));
 
-const P = id => ({ bar:document.getElementById("pb-"+id), txt:document.getElementById("tx-"+id) });
-const pb = { ruen:P("ruen"), gen:P("gen"), enru:P("enru"), sent:P("sent") };
-function onProgress(which){
-  const h = pb[which];
-  return (p)=>{
-    const pct = p.total? Math.min(100, Math.round(100*p.loaded/p.total))
-                        : (p.progress? Math.round(100*p.progress) : 0);
-    if (h.bar) h.bar.style.width = (pct||0) + "%";
-    if (h.txt) h.txt.textContent = (pct||0) + "%";
-  };
+const pctEls = {
+  ruen: document.getElementById('pct-ruen'),
+  gen: document.getElementById('pct-gen'),
+  enru: document.getElementById('pct-enru'),
+  sent: document.getElementById('pct-sent')
+};
+const barEls = {
+  ruen: document.getElementById('pb-ruen'),
+  gen: document.getElementById('pb-gen'),
+  enru: document.getElementById('pb-enru'),
+  sent: document.getElementById('pb-sent')
+};
+function setProgress(key, value){
+  const pct = Math.min(100, Math.max(0, Math.round(value)));
+  if (barEls[key]) barEls[key].style.width = pct + "%";
+  if (pctEls[key]) pctEls[key].textContent = pct + "%";
 }
 
-/* ===== Загрузка моделей ===== */
+/* === модели === */
 const statusEl = document.getElementById('status');
+const loadStatus = document.getElementById('load-status');
 let translateRUEN, generator, translateENRU, sentiment;
 
-async function loadAll(){
-  try {
-    translateRUEN = await pipeline("translation","Xenova/opus-mt-ru-en",{ progress_callback:onProgress("ruen") });
-    generator     = await pipeline("text-generation","Xenova/distilgpt2",{ progress_callback:onProgress("gen") });
-    translateENRU = await pipeline("translation","Xenova/opus-mt-en-ru",{ progress_callback:onProgress("enru") });
-    sentiment     = await pipeline("sentiment-analysis","Xenova/distilbert-base-uncased-finetuned-sst-2-english",{ progress_callback:onProgress("sent") });
-  } catch (e) { logErr(e); }
-}
-await loadAll();
+async function loadPipelines(){
+  try{
+    loadStatus.textContent="Загрузка ru→en...";
+    setProgress('ruen', 5);
+    translateRUEN = await pipeline("translation","Xenova/opus-mt-ru-en", { progress_callback: p=> {
+      if (p.total) setProgress('ruen', p.loaded / p.total * 100);
+      else if (p.progress) setProgress('ruen', p.progress*100);
+    }});
+    setProgress('ruen',100);
 
-/* ===== Загрузка спрайта ===== */
+    loadStatus.textContent="Загрузка LLM...";
+    setProgress('gen',5);
+    generator = await pipeline("text-generation","Xenova/distilgpt2", { progress_callback: p=>{
+      if (p.total) setProgress('gen', p.loaded / p.total * 100);
+      else if (p.progress) setProgress('gen', p.progress*100);
+    }});
+    setProgress('gen',100);
+
+    loadStatus.textContent="Загрузка en→ru...";
+    setProgress('enru',5);
+    translateENRU = await pipeline("translation","Xenova/opus-mt-en-ru", { progress_callback: p=>{
+      if (p.total) setProgress('enru', p.loaded / p.total * 100);
+      else if (p.progress) setProgress('enru', p.progress*100);
+    }});
+    setProgress('enru',100);
+
+    loadStatus.textContent="Загрузка sentiment...";
+    setProgress('sent',5);
+    try{
+      sentiment = await pipeline("sentiment-analysis","Xenova/distilbert-base-uncased-finetuned-sst-2-english", { progress_callback: p=>{
+        if (p.total) setProgress('sent', p.loaded / p.total * 100);
+        else if (p.progress) setProgress('sent', p.progress*100);
+      }});
+    } catch(e){
+      logErr(e);
+      sentiment = null;
+    }
+    setProgress('sent',100);
+
+    loadStatus.textContent="Готово! Можете писать.";
+    statusEl.textContent="Готов! 🐣";
+  } catch(e){
+    logErr(e);
+    loadStatus.textContent="Ошибка при загрузке моделей"; 
+    statusEl.textContent="Ошибка";
+    // добить прогресс визуально
+    setTimeout(()=>{
+      setProgress('ruen',100);
+      setProgress('gen',100);
+      setProgress('enru',100);
+      setProgress('sent',100);
+    }, 1000);
+  }
+}
+await loadPipelines();
+
+/* === загрузка спрайта === */
 const img = new Image();
 img.src = SPRITE_SRC;
 img.addEventListener('error', ()=> logErr("Не удалось загрузить спрайт: " + SPRITE_SRC));
-await img.decode().catch(()=>{/* останется fallback */});
+await img.decode().catch(()=>{/* fallback */});
 
-/* ===== Анимация ===== */
+/* === анимация === */
 let state="idle", frameIdx=0, last=0, fps=8;
 function drawFrame(i){
-  const sx=(i%COLS)*FRAME, sy=Math.floor(i/COLS)*FRAME;
+  const sx = (i % COLS) * FRAME;
+  const sy = Math.floor(i / COLS) * FRAME;
   ctx.clearRect(0,0,FRAME,FRAME);
-  if (img.complete && img.naturalWidth) {
-    ctx.drawImage(img,sx,sy,FRAME,FRAME,0,0,FRAME,FRAME);
-  } else { drawFallback(); }
+  if (img.complete && img.naturalWidth){
+    ctx.drawImage(img, sx, sy, FRAME, FRAME, 0, 0, FRAME, FRAME);
+  } else {
+    drawFallback();
+  }
 }
 function loop(ts){
-  const seq=animations[state]||animations.idle;
-  if (ts-last>1000/fps){ frameIdx=(frameIdx+1)%seq.length; drawFrame(seq[frameIdx]); last=ts; }
+  const seq = animations[state] || animations.idle;
+  if (ts - last > 1000 / fps){
+    frameIdx = (frameIdx + 1) % seq.length;
+    drawFrame(seq[frameIdx]);
+    last = ts;
+  }
   requestAnimationFrame(loop);
 }
 drawFrame(animations[state][0]);
 requestAnimationFrame(loop);
 
-/* ===== Готово к работе ===== */
-document.getElementById('loader').classList.add('hide');
-statusEl.textContent="Готов! Говорите со мной по-русски 🐣";
+/* === генерация ответа: улучшенный промпт === */
+const GEN_STRICT = { do_sample:false, num_beams:4, max_new_tokens:64, no_repeat_ngram_size:3, repetition_penalty:1.2 };
+const GEN_CREATIVE = { do_sample:true, temperature:0.7, top_p:0.9, top_k:50, max_new_tokens:64, no_repeat_ngram_size:3, repetition_penalty:1.1 };
 
-/* ===== Чат ===== */
-const log = document.getElementById('log'), q=document.getElementById('q'), sendBtn=document.getElementById('send');
-function addMsg(text,who="ai"){ const d=document.createElement('div'); d.className=`msg ${who}`; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+function takeFirstSentence(text){
+  const m = String(text).match(/[^.!?…]+[.!?…]/);
+  return (m ? m[0] : text).trim();
+}
+function cleanEN(s){
+  return String(s).replace(/\s+/g," ").replace(/([.!?])\1+/g,"$1").replace(/[“”]+/g,'"').trim();
+}
+function looksBad(s){
+  if(!s || s.length < 4) return true;
+  if(/(.)\1{3,}/i.test(s)) return true;
+  if(/^<\/?[^>]+>/.test(s)) return true;
+  return false;
+}
+async function generateENAnswer(enPrompt){
+  const fewshot = [
+    {q:"Hi! Who are you?", a:"I am Cheepy, a tiny zombie chick who loves to peep and learn."},
+    {q:"Give advice for a bad mood.", a:"Take a deep breath, stretch your wings, and do one small kind thing for yourself."},
+  ];
+  const examples = fewshot.map(x=>`Human: ${x.q}\nCheepy: ${x.a}`).join("\n");
+  const persona = "You are Cheepy, a cute, kind, helpful cartoon zombie chick. Answer in one short, clear sentence.";
+  const base = `${persona}\n${examples}\nHuman: ${enPrompt}\nCheepy:`;
+
+  let out = await generator(base, GEN_STRICT).catch(()=>null);
+  let text = out?.[0]?.generated_text?.replace(base,"")?.trim() || "";
+  text = cleanEN(text);
+  if (looksBad(text)){
+    out = await generator(base, GEN_CREATIVE).catch(()=>null);
+    text = cleanEN(out?.[0]?.generated_text?.replace(base,"")?.trim() || "");
+  }
+  return takeFirstSentence(text);
+}
+
+/* === чат === */
+const logEl = document.getElementById('log');
+const qEl = document.getElementById('q');
+const sendBtn = document.getElementById('send');
+
+function addMsg(text, who='ai'){
+  const b = document.createElement('div');
+  b.className = 'bubble ' + (who==='me' ? 'me' : 'ai');
+  b.textContent = text;
+  logEl.appendChild(b);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+document.getElementById('chat-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const txt = qEl.value.trim();
+  if(!txt) return;
+  qEl.value="";
+  reply(txt);
+});
+
+document.querySelectorAll('[data-act]').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state = btn.dataset.act;
+  });
+});
 
 async function reply(userText){
   try{
-    state="talk"; sendBtn.disabled=true; statusEl.textContent="Думаю…";
-    addMsg(userText,"me");
+    state="talk";
+    sendBtn.disabled=true;
+    addMsg(userText,'me');
 
-    // 1) Перевод RU -> EN
+    // RU -> EN
     let enPrompt = userText;
-    try { enPrompt = (await translateRUEN(userText))[0].translation_text || enPrompt; } catch(e){ logErr(e); }
+    try{ enPrompt = (await translateRUEN(userText))?.[0]?.translation_text || enPrompt; } catch(e){ logErr(e); }
 
-    // 2) Сентимент по англ. тексту
+    // Sentiment
     let mood="NEUTRAL";
-    try {
-      const s = await sentiment(enPrompt);
-      mood = s[0]?.label || "NEUTRAL"; // POSITIVE/NEGATIVE
-    } catch(e){ logErr(e); }
+    try{ if (sentiment){ const s = await sentiment(enPrompt); mood = s?.[0]?.label || 'NEUTRAL'; } } catch(e){ logErr(e); }
 
-    // 3) Генерация (краткий персонаж)
-    const persona = "You are Cheepy, a cute cartoon zombie chick. Answer briefly (1 short sentence).";
-    const prompt  = `${persona}\nHuman: ${enPrompt}\nCheepy:`;
-    let enAnswer="";
-    try {
-      const out = await generator(prompt,{ max_new_tokens:50, temperature:0.9, top_p:0.92 });
-      enAnswer = (out[0].generated_text||"").replace(prompt,"").trim();
-    } catch(e){ logErr(e); enAnswer="(I chirp silently)"; }
+    // Генерация
+    let enAnswer = await generateENAnswer(enPrompt);
+    if (looksBad(enAnswer)) enAnswer = "I flap my tiny wings and try to help.";
 
-    // 4) Перевод EN -> RU
+    // EN -> RU
     let ruAnswer = enAnswer;
-    try { ruAnswer = (await translateENRU(enAnswer))[0].translation_text || ruAnswer; } catch(e){ logErr(e); }
+    try{ ruAnswer = (await translateENRU(enAnswer))?.[0]?.translation_text || ruAnswer; } catch(e){ logErr(e); }
+    ruAnswer = takeFirstSentence(ruAnswer);
 
-    // 5) Визуальная реакция
-    state = (mood==="POSITIVE") ? "happy" : (mood==="NEGATIVE") ? "angry" : "idle";
-
-    addMsg("🐣 "+ruAnswer,"ai");
+    state = (mood === "POSITIVE") ? "happy" : (mood === "NEGATIVE") ? "angry" : "idle";
+    addMsg("🐣 " + ruAnswer,'ai');
     statusEl.textContent="Готов!";
-  } catch(e){ logErr(e); statusEl.textContent="Ошибка"; }
-  finally{ sendBtn.disabled=false; }
+  } catch(e){
+    logErr(e);
+    statusEl.textContent="Ошибка";
+  } finally{
+    sendBtn.disabled=false;
+  }
 }
-
-document.getElementById('chat').addEventListener('submit',e=>{
-  e.preventDefault(); const text=q.value.trim(); if(!text) return; q.value=""; reply(text);
-});
-document.querySelectorAll('[data-act]').forEach(b=> b.addEventListener('click',()=> state=b.dataset.act));
 </script>
 </body>
 </html>
