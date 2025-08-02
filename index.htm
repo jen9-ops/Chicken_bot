@@ -1,32 +1,43 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Мультик: яйцо и цыплёнок</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./styles.css">
+  <title>Zombie Chick Animation</title>
+  <style>
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .sprite-container {
+      width: 20vw; /* Адаптивная ширина */
+      aspect-ratio: 68 / 1024; /* Пропорции одного кадра */
+      background: url('zombie_chick_sprite.png') no-repeat;
+      background-size: calc(68vw * 15 / 100); /* масштабировать по количеству кадров */
+      animation: hatch 1.5s steps(15) infinite;
+    }
+
+    @keyframes hatch {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: -100% 0;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .sprite-container {
+        width: 40vw;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <div class="cartoon-scene">
-      <div id="egg-container">
-        <div class="egg"></div>
-        <div class="crack" id="crack1"></div>
-        <div class="crack" id="crack2"></div>
-      </div>
-      <div id="chicken" class="hide">
-        <div class="chicken-head"></div>
-        <div class="chicken-eye"></div>
-        <div class="chicken-beak"></div>
-        <div class="chicken-body"></div>
-        <div class="chicken-wing left"></div>
-        <div class="chicken-wing right"></div>
-        <div class="chicken-leg left"></div>
-        <div class="chicken-leg right"></div>
-      </div>
-    </div>
-    <div id="caption">...</div>
-  </main>
-  <script src="./script.js"></script>
+  <div class="sprite-container"></div>
 </body>
 </html>
