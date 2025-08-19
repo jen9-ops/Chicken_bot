@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Нейросеть: Все в одном</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    <link rel="stylesheet" href="https://jen9-ops.github.io/library/style.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; color: #333; }
+        .main-container { max-width: 600px; margin: auto; padding: 15px; }
+        h1, h3 { text-align: center; }
+        button { display: block; width: 100%; padding: 12px; margin-bottom: 10px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; color: white; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+        button:active { transform: scale(0.98); }
+        #openVisualizerButton, #clearCanvasButton { background-color: #9c27b0; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .playback-controls { display: flex; gap: 10px; }
+        pre { background-color: #ffffff; padding: 10px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; max-height: 250px; overflow-y: auto; border: 1px solid #e0e0e0; font-family: "Courier New", Courier, monospace; }
+
+        /* НОВОЕ: Стили для полноэкранного оверлея */
+        #visualizer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            z-index: 1000;
+            display: none; /* Скрыт по умолчанию */
+        }
+        #music-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #close-visualizer-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #1a1a1a;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1>Нейросеть-композитор 🎹</h1>
+
+        <div id="auth-block">
+            <button id="signin-button" style="background-color: #db4437;">Войти через Google</button>
+            <button id="signout-button" style="background-color: #6c757d; display: none;">Выйти</button>
+        </div>
+
+        <div class="button-group">
+            <h3>Визуализация</h3>
+            <button id="openVisualizerButton">🎨 Открыть визуализатор</button>
+            <button id="clearCanvasButton">🧹 Очистить холст</button>
+        </div>
+
+        <div class="action-group">
+            <p id="data-info" style="text-align:center;">Ноты в базе для обучения: <b id="data-size">0</b></p>
+            <button id="trainButton">1. Обучить модель</button>
+            <button id="generateButton" disabled>2. Сгенерировать мелодию</button>
+            <button id="retrainButton" disabled>♻️ Добавить и переобучить</button>
+        </div>
+        
+        <h3>Статус</h3>
+        <div id="status-container" class="status-info"><p id="status-text">Войдите в Google для загрузки модели.</p><p id="model-info" style="font-weight: bold;"></p></div>
+        <progress id="training-progress" value="0" max="100" style="display: none; width:100%;"></progress>
+        
+        <h3>Сгенерированная мелодия:</h3>
+        <pre id="output">Здесь появится результат...</pre>
+
+        <div class="playback-controls">
+            <button id="playButton" class="playback-button" disabled>▶️ Прослушать</button>
+            <button id="stopButton" class="playback-button" disabled>⏹️ Стоп</button>
+        </div>
+
+        <div class="button-group">
+            <h3>Управление моделью</h3>
+            <button id="saveModelButton" class="manage-button" disabled>Сохранить на Google Диск</button>
+        </div>
+    </div>
+
+    <div id="visualizer-overlay">
+        <canvas id="music-canvas"></canvas>
+        <button id="close-visualizer-button">Закрыть</button>
+    </div>
+
+    <script>
+        // --- UI ЭЛЕМЕНТЫ ---
+        const openVisualizerBtn = document.getElementById('openVisualizerButton');
+        const closeVisualizerBtn = document.getElementById('close-visualizer-button');
+        const clearCanvasBtn = document.getElementById('clearCanvasButton');
+        const visualizerOverlay = document.getElementById('visualizer-overlay');
+        const canvas = document.getElementById('music-canvas');
+        const ctx = canvas.getContext('2d');
+        // ... (все остальные UI элементы)
+        const trainBtn = document.getElementById('trainButton'); const generateBtn = document.getElementById('generateButton'); const retrainBtn = document.getElementById('retrainButton'); const saveBtn = document.getElementById('saveModelButton'); const playBtn = document.getElementById('playButton'); const stopBtn = document.getElementById('stopButton'); const statusContainer = document.getElementById('status-container'); const statusTextEl = document.getElementById('status-text'); const modelInfoEl = document.getElementById('model-info'); const progressEl = document.getElementById('training-progress'); const outputEl = document.getElementById('output'); const dataSizeEl = document.getElementById('data-size');
+        
+        // --- УПРАВЛЕНИЕ ВИЗУАЛИЗАТОРОМ ---
+        openVisualizerBtn.addEventListener('click', () => {
+            visualizerOverlay.style.display = 'block';
+            setupCanvas();
+        });
+        closeVisualizerBtn.addEventListener('click', () => {
+            visualizerOverlay.style.display = 'none';
+        });
+        clearCanvasBtn.addEventListener('click', () => {
+            // Очищаем и перерисовываем фон
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            updateStatus('Холст очищен.', 'info');
+        });
+
+        // --- ЛОГИКА CANVAS ---
+        function setupCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        function getNoteColor(midi) {
+            if (midi <= 0) return '#444444';
+            const hue = (midi % 12) * 30;
+            return `hsl(${hue}, 90%, 65%)`;
+        }
+        function drawNoteDot(x, y, color, midi) {
+            ctx.beginPath();
+            const radius = 2 + (midi / 127) * 8;
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.globalAlpha = 0.9;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1.0;
+        }
+
+        // --- ВОСПРОИЗВЕДЕНИЕ И ОТРИСОВКА ---
+        // Код снова упрощен, т.к. больше не нужен postMessage
+        async function playMelody() {
+            if (lastGeneratedMelody.length === 0) return;
+            if (Tone.context.state !== 'running') await Tone.start();
+            if (!synth) synth = new Tone.Synth().toDestination();
+            if (currentSequence) currentSequence.stop(0).dispose();
+
+            const events = lastGeneratedMelody.map((midiNote, index) => ({
+                time: index * 0.25,
+                note: Tone.Frequency(midiNote, "midi").toNote(),
+                midi: midiNote,
+                index: index,
+                duration: '8n'
+            }));
+
+            currentSequence = new Tone.Part((time, value) => {
+                if (value.midi > 0) synth.triggerAttackRelease(value.note, value.duration, time);
+                
+                // Рисуем точку прямо отсюда, используя Tone.Draw для синхронизации
+                Tone.Draw.schedule(() => {
+                    const minMidi = 48, maxMidi = 84;
+                    const x = (value.index / lastGeneratedMelody.length) * window.innerWidth;
+                    const y_percent = (value.midi - minMidi) / (maxMidi - minMidi);
+                    const y = window.innerHeight * (1 - y_percent);
+                    const color = getNoteColor(value.midi);
+                    drawNoteDot(x, y, color, value.midi);
+                }, time);
+            }, events).start(0);
+
+            Tone.Transport.start();
+            playBtn.disabled = true; stopBtn.disabled = false;
+        }
+        
+        // --- КОНФИГУРАЦИЯ GOOGLE API ---
+        const CLIENT_ID = 'ВАШ_CLIENT_ID.apps.googleusercontent.com'; // <-- ЗАМЕНИТЕ НА СВОЙ ID
+        const API_KEY = 'ВАШ_API_KEY'; // <-- ЗАМЕНИТЕ НА СВОЙ API KEY
+        // ... (весь остальной JS код для Google Drive, обучения, генерации, как в предыдущем ответе)
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'; const SCOPES = 'https://www.googleapis.com/auth/drive.file'; const MODEL_FILE_NAME = 'music_model.ai'; let tokenClient; let gapiInited = false; let gisInited = false; document.getElementById('signin-button').style.visibility = 'hidden'; document.getElementById('signout-button').style.visibility = 'hidden'; function gapiLoaded() { gapi.load('client', initializeGapiClient); } async function initializeGapiClient() { await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] }); gapiInited = true; maybeEnableButtons(); } function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' }); gisInited = true; maybeEnableButtons(); } function maybeEnableButtons() { if (gapiInited && gisInited) { document.getElementById('signin-button').style.visibility = 'visible'; } } const signinBtn = document.getElementById('signin-button'); const signoutBtn = document.getElementById('signout-button'); signinBtn.addEventListener('click', () => { tokenClient.callback = async (resp) => { if (resp.error !== undefined) { throw (resp); } signinBtn.style.display = 'none'; signoutBtn.style.display = 'block'; updateStatus('Авторизация пройдена!', 'success'); await loadFromDrive(); }; if (gapi.client.getToken() === null) { tokenClient.requestAccessToken({prompt: 'consent'}); } else { tokenClient.requestAccessToken({prompt: ''}); } }); signoutBtn.addEventListener('click', () => { const token = gapi.client.getToken(); if (token !== null) { google.accounts.oauth2.revoke(token.access_token); gapi.client.setToken(''); } signinBtn.style.display = 'block'; signoutBtn.style.display = 'none'; updateStatus('Вы вышли из аккаунта.'); }); let modelFileId = null; async function saveToDrive() { if (!model) { updateStatus('Модель не обучена!', 'error'); return; } updateStatus('Сохранение на Google Диск...', 'info'); const savedModel = await model.save(tf.io.withSaveHandler(async (artifacts) => artifacts)); const modelData = { modelTopology: savedModel.modelTopology, weightSpecs: savedModel.weightSpecs, weightData: Array.from(new Uint8Array(savedModel.weightData)), }; const modelString = JSON.stringify(modelData); const fileMetadata = { 'name': MODEL_FILE_NAME, 'mimeType': 'application/json' }; const requestBody = new FormData(); requestBody.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' })); requestBody.append('file', new Blob([modelString], { type: 'application/json' })); let request; if (modelFileId) { request = gapi.client.request({ path: `/upload/drive/v3/files/${modelFileId}`, method: 'PATCH', params: { uploadType: 'multipart' }, body: requestBody }); } else { request = gapi.client.request({ path: '/upload/drive/v3/files', method: 'POST', params: { uploadType: 'multipart' }, body: requestBody }); } try { const response = await request; modelFileId = response.result.id; updateStatus('Модель успешно сохранена!', 'success', `☁️ Файл: ${MODEL_FILE_NAME}`); } catch (err) { console.error(err); updateStatus('Ошибка сохранения на Диск.', 'error'); } } async function loadFromDrive() { updateStatus('Поиск модели на Google Диске...', 'info'); try { const response = await gapi.client.drive.files.list({ q: `name='${MODEL_FILE_NAME}' and trashed=false`, spaces: 'drive', fields: 'files(id, name)' }); if (response.result.files.length === 0) { updateStatus('Модель на Диске не найдена. Обучите новую.', 'info'); trainBtn.disabled = false; return; } modelFileId = response.result.files[0].id; updateStatus('Модель найдена! Загрузка...', 'info'); const fileContentResponse = await gapi.client.drive.files.get({ fileId: modelFileId, alt: 'media' }); const modelData = fileContentResponse.result; const modelArtifacts = { modelTopology: modelData.modelTopology, weightSpecs: modelData.weightSpecs, weightData: new Uint8Array(modelData.weightData).buffer, }; model = await tf.loadLayersModel(tf.io.fromMemory(modelArtifacts)); updateStatus('Модель успешно загружена с Диска!', 'success', `✅ Загружена модель (${model.layers.length} слоя)`); [generateBtn, saveBtn, trainBtn].forEach(b => b.disabled = false); } catch (err) { console.error(err); updateStatus('Ошибка загрузки с Диска.', 'error'); } }
+        let model; let lastGeneratedMelody = []; let combinedMelodies = [64, 62, 60, 62, 64, 64, 64, 0, 64, 62, 60, 62, 64, 64, 64, 0, 60, 60, 62, 60, 65, 64, 0, 60, 60, 62, 60, 67, 65, 0, 64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 64, 62, 62, 0, 64, 62, 60, 62, 64, 64, 64, 0, 62, 62, 62, 0, 64, 67, 67, 0, 64, 64, 67, 65, 65, 64, 62, 60, 62, 64, 65, 64, 62]; let reshapedXs, ys, noteToIndex, indexToNote, vocabSize, sequences; let synth, currentSequence; const totalEpochs = 200; function updateStatus(message, type = 'info', modelInfo = '') { statusTextEl.innerText = message; statusContainer.className = `status-${type}`; if (modelInfo) modelInfoEl.innerText = modelInfo; } function prepareData() { dataSizeEl.innerText = combinedMelodies.length; if (reshapedXs) tf.dispose([reshapedXs, ys]); const uniqueNotes = [...new Set(combinedMelodies)]; noteToIndex = new Map(uniqueNotes.map((note, index) => [note, index])); indexToNote = new Map(uniqueNotes.map((note, index) => [index, note])); vocabSize = uniqueNotes.length; const sequenceLength = 5; sequences = []; const nextNotes = []; for (let i = 0; i < combinedMelodies.length - sequenceLength; i++) { sequences.push(combinedMelodies.slice(i, i + sequenceLength).map(note => noteToIndex.get(note))); nextNotes.push(noteToIndex.get(combinedMelodies[i + sequenceLength])); } const xs = tf.tensor2d(sequences, [sequences.length, sequenceLength]); ys = tf.oneHot(tf.tensor1d(nextNotes, 'int32'), vocabSize); const normalizedXs = xs.div(tf.scalar(vocabSize)); reshapedXs = normalizedXs.reshape([sequences.length, sequenceLength, 1]); tf.dispose([xs, normalizedXs]); } function createModel() { model = tf.sequential(); model.add(tf.layers.lstm({ units: 128, inputShape: [reshapedXs.shape[1], 1], returnSequences: true })); model.add(tf.layers.dropout({ rate: 0.2 })); model.add(tf.layers.lstm({ units: 128 })); model.add(tf.layers.dense({ units: vocabSize, activation: 'softmax' })); model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] }); } async function trainModel() { updateStatus(`Обучение...`, 'info'); modelInfoEl.innerText = ''; progressEl.style.display = 'block'; progressEl.value = 0; [trainBtn, generateBtn, retrainBtn, loadBtn, saveBtn].forEach(b => b.disabled = true); await model.fit(reshapedXs, ys, { epochs: totalEpochs, batchSize: 32, callbacks: { onEpochEnd: (epoch, logs) => { const progress = ((epoch + 1) / totalEpochs) * 100; progressEl.value = progress; updateStatus(`Идет обучение... Эпоха ${epoch + 1}/${totalEpochs}`, 'info'); }} }); updateStatus('Обучение завершено!', 'success', `✅ Обучена модель (${model.layers.length} слоя)`); setTimeout(() => { progressEl.style.display = 'none'; }, 2000); [trainBtn, generateBtn, saveBtn, loadBtn].forEach(b => b.disabled = false); } async function generateMusic() { if (!model) { updateStatus('Ошибка: модель не обучена!', 'error'); return; } outputEl.innerText = 'Генерация... 🎶'; let inputSequence = sequences[Math.floor(Math.random() * sequences.length)]; let generatedMelody = inputSequence.map(index => indexToNote.get(index)); for (let i = 0; i < 80; i++) { const prediction = tf.tidy(() => { const inputTensor = tf.tensor1d(inputSequence).div(tf.scalar(vocabSize)).reshape([1, sequences[0].length, 1]); return model.predict(inputTensor); }); const predictedIndex = tf.multinomial(prediction, 1).dataSync()[0]; generatedMelody.push(indexToNote.get(predictedIndex)); inputSequence = [...inputSequence.slice(1), predictedIndex]; tf.dispose(prediction); } outputEl.innerText = JSON.stringify(generatedMelody); lastGeneratedMelody = generatedMelody; retrainBtn.disabled = false; playBtn.disabled = false; } async function retrainWithGenerated() { if (lastGeneratedMelody.length === 0) return; updateStatus('Добавление новой мелодии в базу...', 'info'); combinedMelodies.push(0, ...lastGeneratedMelody); lastGeneratedMelody = []; prepareData(); if (!model) createModel(); await trainModel(); } function stopMelody() { Tone.Transport.stop().cancel(0); playBtn.disabled = false; stopBtn.disabled = true; } function init() { prepareData(); } trainBtn.addEventListener('click', async () => { if (!model) createModel(); await trainModel(); }); generateBtn.addEventListener('click', generateMusic); retrainBtn.addEventListener('click', retrainWithGenerated); saveBtn.addEventListener('click', saveToDrive); playBtn.addEventListener('click', playMelody); stopBtn.addEventListener('click', stopMelody); init();
+    </script>
+    <script src="https://jen9-ops.github.io/library/script.js"></script>
+</body>
+</html>
