@@ -1,5 +1,7 @@
 https://jen9-ops.github.io/Chicken_bot/
 
+https://jen9-ops.github.io/Chicken_bot/6.png
+
 https://jen9-ops.github.io/Chicken_bot/index.html
 
 
